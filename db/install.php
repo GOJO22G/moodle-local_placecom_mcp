@@ -1,0 +1,42 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Post-install steps.
+ *
+ * @package    local_placecom_mcp
+ * @copyright  2026 AlmaBay Networks Pvt. Ltd. (Placecom)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+defined('MOODLE_INTERNAL') || die();
+
+/**
+ * Auto-grant local/placecom_mcp:use to the Authenticated user role on install,
+ * so every logged-in user's bridged token can reach the MCP endpoint with zero
+ * manual per-user or per-role setup. Moodle's normal per-function capability
+ * checks still apply downstream (see webservice_mcp's function allowlist).
+ */
+function xmldb_local_placecom_mcp_install() {
+    global $DB;
+
+    $roleid = $DB->get_field('role', 'id', ['shortname' => 'user']);
+    if ($roleid) {
+        $systemcontext = \context_system::instance();
+        assign_capability('local/placecom_mcp:use', CAP_ALLOW, $roleid, $systemcontext->id, true);
+        $systemcontext->mark_dirty();
+    }
+}

@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="local/placecom_mcp/db" VERSION="20260921" COMMENT="XMLDB file for Moodle local/placecom_mcp. Tables merged from local_oauth2 (8 tables) and local_mcpbridge (1 table)."
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+    <TABLES>
+
+        <TABLE NAME="local_placecom_mcp_client" COMMENT="Store all OAuth clients registered in the OAuth server in the local_oauth2 plugin.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="client_secret" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="client_secret_last4" TYPE="char" LENGTH="4" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="redirect_uri" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="require_pkce" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_user_auth_scope" COMMENT="Store the scopes authorized by the users.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_access_token" COMMENT="Store access tokens.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="access_token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="expires" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="access_token" TYPE="unique" FIELDS="access_token"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_authorization_code" COMMENT="Store auth codes before access token.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="authorization_code" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="redirect_uri" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="expires" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="id_token" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="code_challenge" TYPE="char" LENGTH="128" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="code_challenge_method" TYPE="char" LENGTH="20" NOTNULL="false" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="authorization_code" TYPE="unique" FIELDS="authorization_code"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_refresh_token" COMMENT="Store refresh access tokens.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="refresh_token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="user_id" TYPE="int" LENGTH="10" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="expires" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="1333" NOTNULL="false" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="refresh_token" TYPE="unique" FIELDS="refresh_token"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_scope" COMMENT="Store the scopes.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="scope" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="is_default" TYPE="int" LENGTH="1" NOTNULL="false" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="scope" TYPE="unique" FIELDS="scope"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_jwt" COMMENT="">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="subject" TYPE="char" LENGTH="80" NOTNULL="false" SEQUENCE="false"/>
+                <FIELD NAME="public_key" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="local_placecom_mcp_public_key" COMMENT="Store OAuth client public keys.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+                <FIELD NAME="client_id" TYPE="char" LENGTH="80" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="public_key" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="private_key" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
+                <FIELD NAME="encryption_algorithm" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+
+    <TABLE NAME="local_placecom_mcp_token_scope" COMMENT="Maps a bridged webservice token to the OAuth scope granted at the moment it was created, so webservice_mcp can enforce read/write permissions without needing to re-match against local_oauth2's own token table.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The bridged token string, matching external_tokens.token."/>
+        <FIELD NAME="scope" TYPE="char" LENGTH="1333" NOTNULL="true" SEQUENCE="false" COMMENT="The OAuth scope string granted at token-creation time, e.g. 'openid profile moodle_mcp_read'."/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="token" UNIQUE="true" FIELDS="token"/>
+      </INDEXES>
+    </TABLE>
+    </TABLES>
+</XMLDB>
