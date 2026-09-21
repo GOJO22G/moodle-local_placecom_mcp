@@ -23,14 +23,27 @@ All PHP files pass `php -l`, install.xml is well-formed and passes `xmllint`.
 - [x] LICENSE — full GPL v3 text
 - [x] README.md
 
-## Phase 2 — OAuth2 core (NOT STARTED)
-- [ ] Port classes/ (16 files) from local_oauth2, renamespace local_oauth2\... -> local_placecom_mcp\...
-- [ ] Port cli/, vendor/bshaffer/oauth2-server-php, thirdpartylibs.xml
-- [ ] Port login.php, token.php, authorize.php-equivalents, jwks.php, manage_oauth_clients.php,
-      manage_tokens.php, openid_configuration.php, refresh_token.php, userinfo.php
-- [ ] Fix known bug: login.php reads $_POST['code_challenge'] / code_challenge_method directly
-      instead of optional_param()
-- [ ] Update all SQL/table references to new table names
+## Phase 2 — OAuth2 core (DONE, audited)
+- [x] Ported classes/ (16 files), renamespaced local_oauth2\... -> local_placecom_mcp\...
+- [x] Ported cli/generate_keys.php, vendor/bshaffer/oauth2-server-php (untouched, verified
+      byte-identical to original via diff -rq), thirdpartylibs.xml
+- [x] Ported login.php, jwks.php, manage_oauth_clients.php, manage_tokens.php,
+      openid_configuration.php, refresh_token.php, settings.php, token.php, userinfo.php
+- [x] Fixed the $_POST bug: login.php's PKCE param merge now reads via optional_param()
+      instead of indexing $_POST directly
+- [x] All 8 local_oauth2_* table references confirmed renamed (grep-verified in
+      moodle_oauth_storage.php, utils.php, privacy/provider.php)
+- [x] Merged lang/en/local_oauth2.php strings into lang/en/local_placecom_mcp.php;
+      dropped 2 now-duplicate/orphaned keys (pluginname, oauth2:manage_oauth_clients)
+      and 1 pre-existing typo in the original ('prvacy:metadata:...', dead duplicate key)
+- [x] db/tasks.php ported (cleanup task registration) — local_mcpbridge's own task
+      (cleanup_orphaned_scope) still needs merging in here during Phase 4
+- Post-write audit caught 1 real bug: my mechanical rename script walked the whole
+  plugin directory (not just newly-copied files) and incorrectly rewrote 2 doc-comment
+  lines in the already-correct Phase 1 files (version.php, db/access.php) that were
+  meant to say "local_oauth2" as the origin plugin's name, not self-reference the new
+  plugin. Fixed both back to the correct origin reference.
+- All PHP files pass `php -l` (vendor/ excluded, correctly untouched)
 
 ## Phase 3 — MCP server (NOT STARTED)
 - [ ] Port server.php, protected_resource.php from webservice_mcp
