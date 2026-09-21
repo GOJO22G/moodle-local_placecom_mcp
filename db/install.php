@@ -33,10 +33,16 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_local_placecom_mcp_install() {
     global $DB;
 
-    $roleid = $DB->get_field('role', 'id', ['shortname' => 'user']);
-    if ($roleid) {
-        $systemcontext = \context_system::instance();
-        assign_capability('local/placecom_mcp:use', CAP_ALLOW, $roleid, $systemcontext->id, true);
-        $systemcontext->mark_dirty();
+    // Looked up by archetype, not shortname: finds the right role even if an
+    // admin has renamed "Authenticated user" on their site. (This matches the
+    // already-validated lookup pattern from local_mcpbridge's install.php.)
+    $role = $DB->get_record('role', ['archetype' => 'user'], '*', IGNORE_MISSING);
+
+    if (!$role) {
+        debugging('local_placecom_mcp install: could not find Authenticated user role, skipping auto-grant', DEBUG_DEVELOPER);
+    } else {
+        $context = context_system::instance();
+        assign_capability('local/placecom_mcp:use', CAP_ALLOW, $role->id, $context->id, true);
+        $context->mark_dirty();
     }
 }

@@ -2,7 +2,17 @@
 
 Internal notes, not part of the Moodle plugin itself — delete before Marketplace submission.
 
-## Phase 1 — Scaffold (DONE)
+## Phase 1 — Scaffold (DONE, audited)
+Post-write audit caught and fixed 2 real issues before this was called done:
+- db/install.php was looking up the Authenticated User role by `shortname`,
+  which silently fails if an admin renames the role. Fixed to look up by
+  `archetype => 'user'` instead, matching the already-validated pattern from
+  the original local_mcpbridge/db/install.php.
+- db/install.xml had 2 stale table COMMENT strings still describing
+  themselves as belonging to "the local_oauth2 plugin" / "webservice_mcp" —
+  cosmetic only (Moodle doesn't parse these), but fixed for clarity.
+All PHP files pass `php -l`, install.xml is well-formed and passes `xmllint`.
+
 - [x] version.php — component local_placecom_mcp
 - [x] db/access.php — merged capabilities (local/placecom_mcp:use, local/placecom_mcp:manage_oauth_clients)
 - [x] db/install.xml — all 9 tables renamed to local_placecom_mcp_ prefix

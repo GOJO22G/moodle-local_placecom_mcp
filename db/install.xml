@@ -5,7 +5,7 @@
 >
     <TABLES>
 
-        <TABLE NAME="local_placecom_mcp_client" COMMENT="Store all OAuth clients registered in the OAuth server in the local_oauth2 plugin.">
+        <TABLE NAME="local_placecom_mcp_client" COMMENT="Store all OAuth clients registered in this plugin's OAuth2 server.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
                 <FIELD NAME="client_id" TYPE="char" LENGTH="100" NOTNULL="true" SEQUENCE="false"/>
@@ -111,7 +111,7 @@
             </KEYS>
         </TABLE>
 
-    <TABLE NAME="local_placecom_mcp_token_scope" COMMENT="Maps a bridged webservice token to the OAuth scope granted at the moment it was created, so webservice_mcp can enforce read/write permissions without needing to re-match against local_oauth2's own token table.">
+    <TABLE NAME="local_placecom_mcp_token_scope" COMMENT="Maps a webservice token to the OAuth scope granted at the moment it was created, so the MCP server can enforce read/write permissions without a separate lookup against the access_token table.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="token" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="The bridged token string, matching external_tokens.token."/>
