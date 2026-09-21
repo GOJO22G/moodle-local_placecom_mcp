@@ -28,13 +28,19 @@
 defined('MOODLE_INTERNAL') || die();
 
 $capabilities = [
-    // Formerly webservice/mcp:use. Granted to Authenticated user on install (see db/install.php)
+    // Formerly webservice/mcp:use. Granted to Authenticated user via the archetype below,
     // so any logged-in user's bridged token can reach the MCP endpoint; Moodle's normal
-    // per-function capability checks still apply downstream.
+    // per-function capability checks still apply downstream. (Previously this was granted
+    // via a manual assign_capability() call in db/install.php — removed: that ran before
+    // Moodle had registered this plugin's own capability, and crashed install. Archetypes
+    // are synced at the correct point in the install sequence, unlike a self-granting
+    // install.php hook.)
     'local/placecom_mcp:use' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_SYSTEM,
-        'archetypes' => [],
+        'archetypes' => [
+            'user' => CAP_ALLOW,
+        ],
     ],
 
     // Formerly local/oauth2:manage_oauth_clients. Admin-only: register/edit OAuth clients.
