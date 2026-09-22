@@ -640,11 +640,13 @@ class server extends webservice_base_server {
      * Verify the token's granted OAuth scope permits the function it is about to call.
      *
      * Read-type functions are unrestricted. Write-type functions require the token's
-     * granted scope (as recorded by local_oauth2) to include moodle_mcp_write.
+     * granted scope (as recorded in local_placecom_mcp_token_scope by
+     * classes/observers.php) to include moodle_mcp_write.
      *
-     * Tokens with no matching local_oauth2 record (e.g. an admin-generated manual
-     * token, not created via OAuth login) are left unrestricted here - Moodle's own
-     * per-function capability checks still apply downstream regardless.
+     * Tokens with no matching local_placecom_mcp_token_scope record (e.g. an
+     * admin-generated manual token, not created via OAuth login) are left
+     * unrestricted here - Moodle's own per-function capability checks still
+     * apply downstream regardless.
      *
      * @throws \core\exception\moodle_exception If a write function is called without
      *         the moodle_mcp_write scope granted.

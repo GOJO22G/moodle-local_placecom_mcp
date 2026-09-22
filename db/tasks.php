@@ -38,4 +38,16 @@ $tasks = [
         'month' => '*',
         'dayofweek' => '*',
     ],
+    [
+        // Ported from local_mcpbridge's db/tasks.php. Removes
+        // local_placecom_mcp_token_scope rows whose corresponding
+        // external_tokens row is gone (see classes/task/cleanup_orphaned_scope.php).
+        'classname' => 'local_placecom_mcp\task\cleanup_orphaned_scope',
+        'blocking' => 0,
+        'minute' => '0',
+        'hour' => '3',
+        'day' => '*',
+        'month' => '*',
+        'dayofweek' => '*',
+    ],
 ];

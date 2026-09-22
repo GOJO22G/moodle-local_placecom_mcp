@@ -47,8 +47,8 @@ namespace local_placecom_mcp\local;
  *   - server::enforce_scope() blocks execution of anything not listed here,
  *     even if called directly by function name rather than via tools/list.
  *
- * local_mcpbridge's db/services.php also reads this same constant when
- * registering functions on its service, rather than keeping a second,
+ * local_placecom_mcp's db/services.php also reads this same constant when
+ * declaring its auto-created external service, rather than keeping a second,
  * separately-maintained copy.
  *
  * @package     local_placecom_mcp

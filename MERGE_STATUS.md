@@ -138,12 +138,62 @@ unneeded rather than ported.
   classes/local/approved_functions.php, referencing local_mcpbridge's db/services.php
   by name - accurate today, will be stale once Phase 4 removes it as a separate thing.
 
-## Phase 4 — Bridge removal (NOT STARTED)
-- [ ] Reword classes/event/access_token_revoked.php's docblock, which currently references
-      "local_mcpbridge" by name to explain why this event carries extra data — accurate today,
-      will be stale once the bridge is actually folded in
-- [ ] Same reword needed in classes/local/approved_functions.php's docblock, which mentions
-      "local_mcpbridge's db/services.php" by name
+## Phase 4 — Bridge removal (DONE, audited)
+- [x] Ported classes/observers.php (the actual token-mirroring logic: OAuth access
+      tokens -> external_tokens, so they become valid wstokens Moodle's native
+      webservice_base_server::authenticate_by_token() accepts) and
+      classes/task/cleanup_orphaned_scope.php, both renamespaced
+- [x] Created db/events.php (registers the 3 observers against this plugin's own
+      access_token_created/updated/revoked events - now the same plugin watching
+      its own events, which is unusual but not wrong)
+- [x] Created db/services.php (declares the external service Moodle auto-creates
+      on install; renamed from "MCP Bridge Service"/mcpbridge_service to "Placecom
+      MCP Service"/placecom_mcp_service, per the naming decided back in Phase 1
+      planning; reads its function list from the already-ported
+      approved_functions::LIST - verified that constant actually exists under that
+      exact name before referencing it)
+- [x] Merged the cleanup_orphaned_scope task into db/tasks.php alongside the
+      existing cleanup task, same daily-3am schedule as the original
+- [x] Added the serviceid override setting to settings.php + 3 merged lang strings
+- [x] Manually renamed 2 hardcoded strings a blanket rename would NOT have caught
+      (same class of miss as Phase 3's hardcoded paths): the service shortname
+      'mcpbridge_service' -> 'placecom_mcp_service', in both observers.php and
+      db/services.php
+
+**Serious near-miss, found by re-reading the ported file after transforming it, not
+by lint (lint cannot catch a call to a function that doesn't exist but is
+syntactically valid to call):** the ported observers.php still called
+`local_mcpbridge_seed_oauth_scopes()` from lib.php - a defensive scope re-seeding
+helper - inside handle_access_token_created_or_updated(). That helper was
+DELIBERATELY never ported (decided back in the install.php recreation earlier:
+seeding now happens once, correctly, at install time, so the on-login fallback is
+redundant). But porting observers.php via the mechanical rename script left the
+CALL SITE in place while the function it calls doesn't exist anywhere in this
+codebase - which would have thrown a fatal "call to undefined function" error on
+every single OAuth login. This would have broken the exact login flow the partner
+had just confirmed working end-to-end in Phase 3 testing. Caught by re-reading the
+whole file after the transform rather than trusting the transform's output, then
+confirmed the fix was complete by scanning the entire codebase for any other
+local_placecom_mcp_* prefixed function call without a matching definition
+anywhere (found one more hit, which turned out to be a class instantiation, not
+a function call - verified, not a bug).
+
+**Why the underlying bridging mechanism was ported as-is, not simplified:**
+MERGE_STATUS previously floated "issue the webservice token directly at OAuth
+grant time instead of mirroring via an observer" as a cleaner long-term design.
+Given a partner was actively blocked on this exact gap during live testing, the
+event-observer mechanism ported here is the same one already proven correct in
+the original 3-plugin setup (per this project's own history, 2 real bugs were
+already found and fixed in this exact code before this merge project began) -
+safer to restore proven working code under time pressure than to design and
+trust new, untested architecture. The "even simpler, no separate observer"
+refactor remains a valid future improvement, not something to gamble on now.
+
+- All PHP files pass `php -l`. Cross-checked every get_string() call has a
+  matching lang key. Scanned the whole codebase for any other undefined-function
+  risk of the same shape as the bug above - none found.
+
+
 - [ ] Port local_mcpbridge_token_scope table logic and cleanup task only
 - [ ] Delete/replace observers.php's token-mirroring — issue webservice token directly
       at OAuth grant time instead of mirroring into external_tokens separately

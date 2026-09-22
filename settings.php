@@ -72,6 +72,19 @@ if ($hassiteconfig) {
         )
     );
 
+    // Optional override: bridge OAuth tokens into a different, already-existing
+    // external service instead of the one this plugin auto-creates on install.
+    // Ported from local_mcpbridge's settings.php.
+    $settings->add(
+        new admin_setting_configtext(
+            'local_placecom_mcp/serviceid',
+            get_string('settings_serviceid', 'local_placecom_mcp'),
+            get_string('settings_serviceid_desc', 'local_placecom_mcp'),
+            '',
+            PARAM_INT
+        )
+    );
+
     // Access token timeout period.
     $settings->add(
         new admin_setting_configduration(

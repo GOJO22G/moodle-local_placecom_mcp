@@ -19,9 +19,10 @@
  *
  * Deliberately carries the actual token string in 'other', unlike
  * access_token_deleted (used by the expiry-cleanup scheduled task), which
- * only carries the already-deleted row's id - not enough for another
- * plugin (e.g. local_mcpbridge) to identify which of ITS OWN bridged
- * records correspond to the same login session.
+ * only carries the already-deleted row's id - not enough for
+ * classes/observers.php's handle_access_token_revoked() to identify which
+ * of its own bridged records (external_tokens, local_placecom_mcp_token_scope)
+ * correspond to the same login session.
  *
  * @package local_placecom_mcp
  * @copyright 2026 AlmaBay Networks Pvt. Ltd.
