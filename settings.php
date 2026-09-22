@@ -58,6 +58,20 @@ if ($hassiteconfig) {
     $settings = new admin_settingpage('local_placecom_mcp_token_lifetime', get_string('settings_token_settings', 'local_placecom_mcp'));
     $ADMIN->add('local_placecom_mcp', $settings);
 
+    // Master on/off switch for the MCP server endpoint (server.php).
+    // Replaces webservice_mcp's old on/off control, which was the
+    // Site Admin > Server > Web services > Manage protocols checkbox -
+    // that mechanism only exists for "webservice" type plugins and stopped
+    // existing once this became a "local" type plugin during the merge.
+    $settings->add(
+        new admin_setting_configcheckbox(
+            'local_placecom_mcp/enable_mcp_server',
+            get_string('settings_enable_mcp_server', 'local_placecom_mcp'),
+            get_string('settings_enable_mcp_server_desc', 'local_placecom_mcp'),
+            1
+        )
+    );
+
     // Access token timeout period.
     $settings->add(
         new admin_setting_configduration(

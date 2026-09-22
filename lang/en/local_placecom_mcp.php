@@ -115,6 +115,8 @@ $string['error_deleting_oauth_client'] = 'Error occurred while deleting OAuth cl
 $string['error_updating_oauth_client'] = 'Error occurred while updating OAuth client';
 $string['not_implemented'] = 'Not implemented';
 $string['settings_token_settings'] = 'Token settings';
+$string['settings_enable_mcp_server'] = 'Enable MCP server';
+$string['settings_enable_mcp_server_desc'] = 'Turns the MCP (Model Context Protocol) server endpoint on or off. When disabled, server.php refuses all requests regardless of a valid token or capability. Replaces the old Site Admin > Server > Web services > Manage protocols toggle, which no longer applies now that this is a "local" plugin rather than a "webservice" plugin.';
 $string['settings_access_token_lifetime'] = 'Access token lifetime';
 $string['settings_access_token_lifetime_desc'] = 'The period of time that the access token is valid for';
 $string['settings_refresh_token_lifetime'] = 'Refresh token lifetime';
@@ -156,3 +158,24 @@ $string['revoke'] = 'Revoke';
 $string['revoke_confirm'] = 'Are you sure you want to revoke this token? The user will be immediately signed out of this session.';
 $string['token_revoked'] = 'Token revoked successfully.';
 $string['token_not_found'] = 'Token not found.';
+
+
+// ---------------------------------------------------------------------
+// Strings below are ported from webservice_mcp (MCP web service protocol
+// implementation, originally by MohammadReza PourMohammad), as part of the
+// webservice_mcp -> local_placecom_mcp merge. Note: webservice_mcp's own
+// 'privacy:metadata' string (used by its null_provider - "this plugin stores
+// no personal data") is NOT included here. That claim was only ever true for
+// webservice_mcp in isolation; the merged plugin's privacy provider is
+// local_oauth2's real metadata provider, since the merged plugin as a whole
+// genuinely does process personal data via its OAuth2 core.
+// ---------------------------------------------------------------------
+
+$string['err_empty_request'] = 'Request body is empty';
+$string['err_invalid_json'] = 'Invalid JSON';
+$string['err_invalid_jsonrpc'] = 'Invalid JSON-RPC version';
+$string['err_missing_method'] = 'Missing method';
+$string['err_missing_tool_name'] = 'Missing tool name';
+$string['err_scope_insufficient'] = 'This token does not have permission to call write functions';
+
+$string['err_function_not_approved'] = 'This function is not on the approved list for this MCP server';
