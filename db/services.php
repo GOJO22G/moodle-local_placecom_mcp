@@ -26,11 +26,11 @@ defined('MOODLE_INTERNAL') || die();
 // Moodle only re-syncs a plugin's declared service when it detects a version
 // change and runs the upgrade step - the list changing alone, with no
 // version bump, has no effect on an already-installed site.
-$functions = \local_placecom_mcp\local\approved_functions::LIST;
+$approvedfunctionnames = \local_placecom_mcp\local\approved_functions::LIST;
 
 $services = [
     'Placecom MCP Service' => [
-        'functions'       => $functions,
+        'functions'       => $approvedfunctionnames,
         'restrictedusers' => 0,   // any authorised user's bridged token works - no per-user manual authorisation step
         'enabled'         => 1,   // on immediately after install, no manual toggle
         'shortname'       => 'placecom_mcp_service',
