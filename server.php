@@ -50,7 +50,10 @@ require('../../config.php');
 // permanently return 403 to everyone, forever, regardless of any setting.
 // Replaced with a normal plugin setting instead (Site administration > Server >
 // Placecom MCP Connector > "Enable MCP server"), defaulting to enabled.
-if (!get_config('local_placecom_mcp', 'enable_mcp_server')) {
+// get_config() returns false when the setting has never been saved (for example when the admin skipped
+// the "New settings" page after installing). The default is "on", so only an explicit "off" blocks.
+$mcpserverenabled = get_config('local_placecom_mcp', 'enable_mcp_server');
+if ($mcpserverenabled !== false && !$mcpserverenabled) {
     header("HTTP/1.0 403 Forbidden");
     debugging(
         'The server died because the MCP server is disabled in local_placecom_mcp settings',

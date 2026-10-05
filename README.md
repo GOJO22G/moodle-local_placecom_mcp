@@ -32,6 +32,10 @@ always apply. The assistant never sees more than that user could see in Moodle.
 
 - Moodle 4.5 or later.
 - The PHP OpenSSL extension (used once at install time to generate the signing key pair).
+  On some Windows servers (for example XAMPP) PHP cannot find OpenSSL's configuration file and
+  key generation fails. If that happens, set `$CFG->opensslcnf` in `config.php` to the full path of
+  your `openssl.cnf` (the same setting Moodle core uses), then run
+  `php local/placecom_mcp/cli/generate_keys.php`.
 - To connect a hosted assistant such as Claude, your Moodle site must be reachable
   from the internet over HTTPS. Hosted assistants cannot reach `localhost`.
 

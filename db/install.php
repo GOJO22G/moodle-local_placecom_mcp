@@ -51,7 +51,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_local_placecom_mcp_install() {
-    global $DB;
+    global $DB, $CFG;
 
     // Default OpenID Connect scopes, plus the two MCP-specific scopes that
     // must exist at install time (not only after a first login) so a client
@@ -82,15 +82,29 @@ function xmldb_local_placecom_mcp_install() {
             'private_key_bits' => 2048,
             'private_key_type' => OPENSSL_KEYTYPE_RSA,
         ];
+        // On some servers (typically Windows, e.g. XAMPP) PHP cannot find OpenSSL's configuration file and
+        // key generation fails. Moodle core lets administrators point to one with $CFG->opensslcnf
+        // (see mnet/lib.php), so honour the same setting here.
+        if (!empty($CFG->opensslcnf)) {
+            $config['config'] = $CFG->opensslcnf;
+        }
 
         $res = openssl_pkey_new($config);
         if ($res === false) {
             debugging('local_placecom_mcp install: failed to generate RSA key pair: '
-                . openssl_error_string(), DEBUG_DEVELOPER);
+                . openssl_error_string()
+                . ' - OAuth sign-in cannot issue ID tokens until a key exists. If this server is Windows, set'
+                . ' $CFG->opensslcnf in config.php to the full path of openssl.cnf, then run'
+                . ' php local/placecom_mcp/cli/generate_keys.php', DEBUG_DEVELOPER);
             return true;
         }
 
-        openssl_pkey_export($res, $privatekey);
+        // The same configuration is needed when exporting the private key.
+        if (!openssl_pkey_export($res, $privatekey, null, $config)) {
+            debugging('local_placecom_mcp install: failed to export RSA private key: '
+                . openssl_error_string(), DEBUG_DEVELOPER);
+            return true;
+        }
 
         $publickey = openssl_pkey_get_details($res);
         $publickey = $publickey['key'];

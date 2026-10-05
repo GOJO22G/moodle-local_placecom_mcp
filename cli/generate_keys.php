@@ -113,13 +113,20 @@ $config = [
     'private_key_type' => OPENSSL_KEYTYPE_RSA,
 ];
 
+// On some servers (typically Windows) PHP cannot find OpenSSL's configuration file. Moodle core lets
+// administrators point to one with $CFG->opensslcnf (see mnet/lib.php), so honour the same setting.
+if (!empty($CFG->opensslcnf)) {
+    $config['config'] = $CFG->opensslcnf;
+}
+
 $res = openssl_pkey_new($config);
 if ($res === false) {
-    cli_error('Failed to generate RSA key pair: ' . openssl_error_string(), 1);
+    cli_error('Failed to generate RSA key pair: ' . openssl_error_string()
+        . ' (On Windows, set $CFG->opensslcnf in config.php to the full path of openssl.cnf and try again.)', 1);
 }
 
 // Extract private key.
-if (!openssl_pkey_export($res, $privatekey)) {
+if (!openssl_pkey_export($res, $privatekey, null, $config)) {
     cli_error('Failed to export private key: ' . openssl_error_string(), 1);
 }
 
