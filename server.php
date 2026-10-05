@@ -48,7 +48,7 @@ require('../../config.php');
 // local_mcpbridge into one plugin) - "mcp" is no longer a protocol Moodle
 // knows about at all, so the old check would have silently made this endpoint
 // permanently return 403 to everyone, forever, regardless of any setting.
-// Replaced with a normal plugin setting instead (Site Admin > Local plugins >
+// Replaced with a normal plugin setting instead (Site administration > Server >
 // Placecom MCP Connector > "Enable MCP server"), defaulting to enabled.
 if (!get_config('local_placecom_mcp', 'enable_mcp_server')) {
     header("HTTP/1.0 403 Forbidden");

@@ -64,6 +64,14 @@ $string['privacy:metadata:local_placecom_mcp_refresh_token:user_id'] = 'The ID o
 $string['privacy:metadata:local_placecom_mcp_refresh_token:client_id'] = 'The ID of the OAuth2 client to which the refresh token was issued.';
 $string['privacy:metadata:local_placecom_mcp_refresh_token:expires'] = 'The expiration time of the refresh token.';
 $string['privacy:metadata:local_placecom_mcp_refresh_token:scope'] = 'The scope of the refresh token.';
+$string['privacy:metadata:local_placecom_mcp_token_scope'] = 'Records the OAuth scope that was granted when a web service token was issued to a user, so that read and write permissions can be enforced. A record belongs to a user through the token it describes.';
+$string['privacy:metadata:local_placecom_mcp_token_scope:token'] = 'The web service token that the scope applies to.';
+$string['privacy:metadata:local_placecom_mcp_token_scope:scope'] = 'The OAuth scope that was granted when the token was issued.';
+$string['privacy:metadata:local_placecom_mcp_token_scope:timecreated'] = 'The time the record was created.';
+$string['privacy:metadata:core_external'] = 'A web service token is created for each user who authorises an AI assistant, so that the MCP server can authenticate the assistant. These tokens are stored by the Moodle web services subsystem.';
+$string['privacy:metadata:mcp_assistant'] = 'When a user authorises an AI assistant (an MCP client) to access Moodle, data about that user is sent to the assistant. The assistant provider handles that data under its own terms and privacy policy.';
+$string['privacy:metadata:mcp_assistant:identity'] = 'Identity details released through OpenID Connect, depending on the scopes the user grants: user ID, username, name, email address, picture, address and phone number.';
+$string['privacy:metadata:mcp_assistant:moodledata'] = 'The results of the approved web service functions that the assistant calls for the user, such as courses, activities, completion, badges, files, grades, calendar events and forum content that the user can access in Moodle.';
 $string['privacy:metadata:local_placecom_mcp_refresh_token:refresh_token'] = 'The refresh token issued to the user.';
 
 // Capabilities.

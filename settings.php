@@ -29,10 +29,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    // Add a section for the plugin configurations in the "Local plugins" section.
+    // Add a section for the plugin configuration under Site administration > Server.
     $ADMIN->add('server', new admin_category('local_placecom_mcp', get_string('pluginname', 'local_placecom_mcp')));
 
-    // Add OAuth provider settings to the "Server" section.
+    // Add the OAuth client management page to this section.
     $ADMIN->add(
         'local_placecom_mcp',
         new admin_externalpage(

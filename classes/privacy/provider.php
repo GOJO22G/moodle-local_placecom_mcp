@@ -29,18 +29,24 @@ use core_privacy\local\request\writer;
 /**
  * Privacy Subsystem for local_placecom_mcp implements metadata provider.
  *
+ * A user's data is held in the user's own context. The token scope table has no user
+ * column: a row belongs to a user through the web service token it describes
+ * (external_tokens.token and external_tokens.userid), so it is always reached by joining
+ * to external_tokens.
+ *
  * @package local_placecom_mcp
  * @author Lai Wei <lai.wei@enovation.ie>
  * @author Dorel Manolescu <dorel.manolescu@enovation.ie>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @copyright (C) 2025 Enovation Solutions
- * @copyright 2026 AlmaBay Networks Pvt. Ltd. (Placecom) - namespace/table renames, PKCE param fix
+ * @copyright 2026 AlmaBay Networks Pvt. Ltd. (Placecom) - namespace/table renames, token scope coverage,
+ *            user context handling, declaration of data released to AI assistants
  */
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\core_userlist_provider,
     \core_privacy\local\request\plugin\provider {
-    /** @var string[] plugin tables that contain user data. */
+    /** @var string[] plugin tables that contain a user_id column. */
     const TABLES = [
         'local_placecom_mcp_user_auth_scope',
         'local_placecom_mcp_access_token',
@@ -107,6 +113,31 @@ class provider implements
             'privacy:metadata:local_placecom_mcp_refresh_token'
         );
 
+        // Add metadata for the local_placecom_mcp_token_scope table. It is linked to a user
+        // through the web service token, not through a user column.
+        $collection->add_database_table(
+            'local_placecom_mcp_token_scope',
+            [
+                'token' => 'privacy:metadata:local_placecom_mcp_token_scope:token',
+                'scope' => 'privacy:metadata:local_placecom_mcp_token_scope:scope',
+                'timecreated' => 'privacy:metadata:local_placecom_mcp_token_scope:timecreated',
+            ],
+            'privacy:metadata:local_placecom_mcp_token_scope'
+        );
+
+        // A web service token is created for each authorised user and stored by core_external.
+        $collection->add_subsystem_link('core_external', [], 'privacy:metadata:core_external');
+
+        // Data that is released to a connected AI assistant (an MCP client).
+        $collection->add_external_location_link(
+            'mcp_assistant',
+            [
+                'identity' => 'privacy:metadata:mcp_assistant:identity',
+                'moodledata' => 'privacy:metadata:mcp_assistant:moodledata',
+            ],
+            'privacy:metadata:mcp_assistant'
+        );
+
         return $collection;
     }
 
@@ -133,6 +164,14 @@ class provider implements
             $contextlist->add_from_sql($sql, $params);
         }
 
+        // Token scope rows belong to the user who owns the web service token.
+        $sql = "SELECT ctx.id
+                  FROM {local_placecom_mcp_token_scope} ts
+                  JOIN {external_tokens} et ON et.token = ts.token
+                  JOIN {context} ctx ON ctx.instanceid = et.userid AND ctx.contextlevel = :contextlevel
+                 WHERE et.userid = :userid";
+        $contextlist->add_from_sql($sql, ['contextlevel' => CONTEXT_USER, 'userid' => $userid]);
+
         return $contextlist;
     }
 
@@ -145,13 +184,29 @@ class provider implements
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
+        if ($context instanceof \context_user) {
+            // A user context holds the data of the one user it belongs to.
+            if (self::user_has_data((int) $context->instanceid)) {
+                $userlist->add_user((int) $context->instanceid);
+            }
+            return;
+        }
+
         if (!$context instanceof context_system) {
             return;
         }
 
-        foreach (static::TABLES as $table) {
-            $userlist->add_from_sql('user_id', "SELECT DISTINCT user_id FROM {$table}", []);
+        foreach (self::TABLES as $table) {
+            $userlist->add_from_sql('user_id', "SELECT DISTINCT user_id FROM {{$table}}", []);
         }
+
+        $userlist->add_from_sql(
+            'userid',
+            "SELECT DISTINCT et.userid
+               FROM {local_placecom_mcp_token_scope} ts
+               JOIN {external_tokens} et ON et.token = ts.token",
+            []
+        );
     }
 
     /**
@@ -180,16 +235,10 @@ class provider implements
      * @return void
      */
     public static function delete_data_for_users(approved_userlist $userlist) {
-        global $DB;
-
         $context = $userlist->get_context();
-        $userids = $userlist->get_userids();
-        if ($context->contextlevel == CONTEXT_SYSTEM) {
-            foreach (static::TABLES as $table) {
-                foreach ($userids as $userid) {
-                    $DB->delete_records($table, ['user_id' => $userid]);
-                }
-            }
+
+        if ($context->contextlevel == CONTEXT_SYSTEM || $context->contextlevel == CONTEXT_USER) {
+            self::delete_user_data($userlist->get_userids());
         }
     }
 
@@ -203,9 +252,12 @@ class provider implements
         global $DB;
 
         if ($context->contextlevel == CONTEXT_SYSTEM) {
-            foreach (static::TABLES as $table) {
+            foreach (self::TABLES as $table) {
                 $DB->delete_records($table);
             }
+            $DB->delete_records('local_placecom_mcp_token_scope');
+        } else if ($context->contextlevel == CONTEXT_USER) {
+            self::delete_user_data([(int) $context->instanceid]);
         }
     }
 
@@ -216,13 +268,12 @@ class provider implements
      * @return void
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
-        global $DB;
-
         $user = $contextlist->get_user();
-        $context = context_system::instance();
-        if ($context->contextlevel == CONTEXT_SYSTEM) {
-            foreach (static::TABLES as $table) {
-                $DB->delete_records($table, ['user_id' => $user->id]);
+
+        foreach ($contextlist->get_contexts() as $context) {
+            if ($context->contextlevel == CONTEXT_USER && $context->instanceid == $user->id) {
+                self::delete_user_data([(int) $user->id]);
+                return;
             }
         }
     }
@@ -234,10 +285,14 @@ class provider implements
      * @return void
      */
     public static function export_local_placecom_mcp_userdata(\context $context) {
-        global $DB, $USER;
+        global $DB;
         if (!$context instanceof \context_user) {
             return;
         }
+
+        // The context belongs to the user whose data is being exported. This is not necessarily
+        // the logged in user: a data request is usually processed by an administrator or cron.
+        $userid = (int) $context->instanceid;
 
         $subcontext[] = get_string('pluginname', 'local_placecom_mcp');
 
@@ -245,6 +300,7 @@ class provider implements
         $usertokendata = [];
         $usercodedata = [];
         $userrefreshtokendata = [];
+        $usertokenscopedata = [];
         $notexportedstr = get_string('privacy:request:notexportedsecurity', 'core_external');
 
         foreach (self::TABLES as $table) {
@@ -252,7 +308,7 @@ class provider implements
                       FROM {{$table}} t
                      WHERE t.user_id = :userid";
             $params = [
-                'userid' => $USER->id,
+                'userid' => $userid,
             ];
             $records = $DB->get_records_sql($sql, $params);
 
@@ -276,14 +332,90 @@ class provider implements
             }
         }
 
-        if (!empty($data) || !empty($usertokendata) || !empty($usercodedata) || !empty($userrefreshtokendata)) {
-            \core_privacy\local\request\writer::with_context($context)
+        // The token itself is a credential, so only the scope and time are exported.
+        $sql = "SELECT ts.id, ts.scope, ts.timecreated
+                  FROM {local_placecom_mcp_token_scope} ts
+                  JOIN {external_tokens} et ON et.token = ts.token
+                 WHERE et.userid = :userid";
+        foreach ($DB->get_records_sql($sql, ['userid' => $userid]) as $record) {
+            $usertokenscopedata[] = (object) [
+                'scope' => $record->scope,
+                'timecreated' => transform::datetime($record->timecreated),
+            ];
+        }
+
+        if (
+            !empty($data) || !empty($usertokendata) || !empty($usercodedata) ||
+            !empty($userrefreshtokendata) || !empty($usertokenscopedata)
+        ) {
+            writer::with_context($context)
                 ->export_data($subcontext, (object)[
                     'userauthscope' => $data,
                     'userauthtoken' => $usertokendata,
                     'userauthcode' => $usercodedata,
                     'userrefreshtoken' => $userrefreshtokendata,
+                    'usertokenscope' => $usertokenscopedata,
                 ]);
         }
+    }
+
+    /**
+     * Whether the user has any data held by this plugin.
+     *
+     * @param int $userid The user ID.
+     * @return bool
+     */
+    protected static function user_has_data(int $userid): bool {
+        global $DB;
+
+        foreach (self::TABLES as $table) {
+            if ($DB->record_exists($table, ['user_id' => $userid])) {
+                return true;
+            }
+        }
+
+        return $DB->record_exists_sql(
+            "SELECT 1
+               FROM {local_placecom_mcp_token_scope} ts
+               JOIN {external_tokens} et ON et.token = ts.token
+              WHERE et.userid = :userid",
+            ['userid' => $userid]
+        );
+    }
+
+    /**
+     * Deletes all of the plugin's data for the given users.
+     *
+     * @param int[] $userids The user IDs.
+     * @return void
+     */
+    protected static function delete_user_data(array $userids): void {
+        global $DB;
+
+        if (empty($userids)) {
+            return;
+        }
+
+        [$usersql, $userparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+
+        foreach (self::TABLES as $table) {
+            $DB->delete_records_select($table, "user_id $usersql", $userparams);
+        }
+
+        // Token scope rows have no user column, so find them through the users' web service tokens.
+        $DB->delete_records_select(
+            'local_placecom_mcp_token_scope',
+            "token IN (SELECT et.token FROM {external_tokens} et WHERE et.userid $usersql)",
+            $userparams
+        );
+
+        // Moodle's core_external provider also deletes web service tokens, and the order in which
+        // providers run is not defined. If it ran first, the rows above can no longer be matched to
+        // a user. A row whose token no longer exists cannot be linked to anyone and is of no use,
+        // so remove such rows now instead of waiting for the scheduled cleanup task.
+        $DB->delete_records_select(
+            'local_placecom_mcp_token_scope',
+            "token NOT IN (SELECT et.token FROM {external_tokens} et)"
+        );
     }
 }

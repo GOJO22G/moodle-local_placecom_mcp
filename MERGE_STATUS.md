@@ -193,30 +193,107 @@ refactor remains a valid future improvement, not something to gamble on now.
   matching lang key. Scanned the whole codebase for any other undefined-function
   risk of the same shape as the bug above - none found.
 
+**Real bug found via actual install/upgrade testing (nothing above caught this):**
+db/services.php used `$functions` as the local variable name for the approved-
+function list. `$functions` is a reserved name in Moodle's db/services.php
+convention specifically for registering brand-new external function definitions
+(keyed by function name, each with classname/methodname sub-keys) - this file
+doesn't define any new functions, it's just a flat list of existing function names
+to attach to a service, so Moodle's external_update_descriptions() tried to parse
+each function-name string as if it were a definition array and crashed with
+"Cannot access offset of type string on string". This bug was introduced during
+this port, not inherited from the original: local_mcpbridge's own version of this
+file used `$mcpbridge_functions`, avoiding the collision; this rewrite used
+`$functions` instead. Fixed by renaming to `$approvedfunctionnames`. Also bumped
+`$plugin->version` (2026092100 -> 2026092201) - required for Moodle to re-sync
+db/services.php on upgrade; without a version bump, an already-installed site
+would never pick up this fix.
 
-- [ ] Port local_mcpbridge_token_scope table logic and cleanup task only
-- [ ] Delete/replace observers.php's token-mirroring — issue webservice token directly
-      at OAuth grant time instead of mirroring into external_tokens separately
+## Phase 5 — Privacy (DONE statically; needs a live data-request test)
+- [x] Privacy provider now covers local_placecom_mcp_token_scope: metadata declaration, export
+      (scope + time only, never the token string), and deletion. That table has no user column,
+      so rows are reached through external_tokens (token -> userid).
+- [x] Deletion works whichever provider runs first. core_external deletes a user's
+      external_tokens too, and provider order is not defined, so after the join-based delete
+      the provider also sweeps token_scope rows whose token no longer exists. Verified by
+      running the provider's exact SQL on a real engine: normal order, core-first order,
+      several users at once, other users untouched.
+- [x] Declared the data released to a connected AI assistant (add_external_location_link) and
+      the web service tokens held by core_external (add_subsystem_link). All 32 metadata
+      strings used by the provider exist in the lang file; none orphaned; no duplicates.
+- [x] Two bugs inherited from local_oauth2 fixed in the same file:
+      1. get_users_in_context built "FROM {$table}" (PHP swallowed the braces, so no table
+         prefix) - would fail on any real site. Now "{{$table}}".
+      2. export read $USER->id (whoever runs the request - admin/cron) instead of the user
+         the context belongs to - would export the wrong user's data. Now $context->instanceid.
+- [x] Context handling made consistent: the provider reports CONTEXT_USER, but
+      get_users_in_context / delete_data_for_users / delete_data_for_all_users_in_context
+      only acted on CONTEXT_SYSTEM, so they did nothing for reported contexts. They now handle
+      both. delete_data_for_user only deletes when the user's own context is in the list.
+- [x] Moodle 4.5 API names/signatures verified against real source (collection, userlist,
+      contextlist, DML), not memory.
+- [ ] NOT verified live: no Moodle instance here. To confirm, create a data request
+      (Site administration > Users > Privacy and policies > Data requests) for a test user who
+      has connected an assistant, then check the export contains the 'usertokenscope' section
+      and that a deletion request leaves no rows for that user in any local_placecom_mcp_* table.
+- Version bumped to 2026100500 (no schema change; refreshes cached strings on upgrade).
 
-## Phase 5 — Privacy (NOT STARTED)
-- [ ] Merge local_oauth2's and webservice_mcp's privacy providers into one
-- [ ] Explicitly cover local_placecom_mcp_token_scope (previously undocumented
-      in local_mcpbridge, which had no privacy provider at all)
-
-## Phase 6 — Testing (PARTIAL — Phases 1-2 verified live)
+## Phase 6 — Testing (SUBSTANTIALLY COMPLETE)
 - [x] Fresh install actually tested by partner on real Moodle — passed, after 2 real bugs
       found and fixed (capability self-grant timing crash; missing scope-seeding +
       RSA keypair generation). Confirmed: local_placecom_mcp_scope has 8 rows,
       local_placecom_mcp_public_key has 1 row with client_id = ''.
-- [ ] OAuth login -> token -> tools/list -> tools/call round trip — can't test yet,
-      MCP server itself isn't ported in (that's Phase 3, not started)
+- [x] db/services.php install/upgrade crash ($functions reserved-name collision) -
+      found via testing, fixed, version bumped, re-tested clean.
+- [x] Full OAuth login -> token -> tools/list -> tools/call round trip - PASSED.
+      Specifically: authorize, login, PKCE (S256), code exchange, access + refresh
+      + signed id_token all confirmed working. tools/list returns exactly the 36
+      approved functions. tools/call executes real Moodle functions with correct
+      MCP-formatted responses.
+- [x] Write-scope enforcement tested both directions: moodle_mcp_write token can
+      post to forums; read-only-scoped token cleanly rejected with
+      err_scope_insufficient. This is the exact code path Phase 3's
+      local_mcpbridge_token_scope table-name bug was in - confirmed actually
+      working now, not just installing without error.
+- [x] Cross-user data leak resistance actively tested - the original motivating
+      security concern for the approved-functions allowlist. Tried
+      core_user_get_users_by_field (the function that caused the original leak)
+      directly by function name, not just via tools/list - blocked outright by
+      the allowlist. Also tried course-completion and group-membership lookups
+      for another user - correctly blocked by Moodle's own capability checks.
+- [x] Real end-to-end test with an actual Claude connection via custom connector -
+      completed OAuth for real, Claude correctly reported functions outside the
+      allowlist as unavailable rather than guessing or hallucinating access.
+- [ ] Token revocation - NOT yet tested. Does revoking a token or deleting an
+      OAuth client actually cut off access immediately (both the OAuth-side
+      revocation and observers.php's handle_access_token_revoked bridge cleanup)?
+      Flagged by partner as open, not yet a confirmed blocker, but this is a
+      security-relevant path (same fail-closed category as the write-scope
+      enforcement above) and worth testing deliberately rather than assuming it
+      works because the rest of the bridge does.
 - [ ] PostgreSQL compatibility test (MySQL-only so far)
 - [ ] Run moodle-plugin-ci
 
+Also noted by partner, not a bug: the `issuer` config value is empty in the
+database but the OIDC discovery document resolves correctly at runtime anyway
+(falls back to $CFG->wwwroot) - the setting exists for sites that need an
+explicit override (e.g. behind a reverse proxy), it's just unused on this test
+site. Working as designed.
+
+**Deliberately NOT doing right now:** replacing the observer-based token bridge
+(classes/observers.php) with a simpler direct-issuance approach. This was raised
+as a possible future cleanup back in Phase 4, and it's still a reasonable idea -
+but the observer mechanism now has real, passing, end-to-end test coverage
+including the exact security-sensitive scope-enforcement path. Swapping it for
+new, untested architecture now would be trading a proven-working thing for an
+unproven one, for a cleanliness win rather than a functional need. Worth
+revisiting after Marketplace submission, not before.
+
 ## Phase 7 — Marketplace readiness (NOT STARTED)
+- [x] Repo renamed to moodle-local_placecom_mcp convention — already done when the
+      GitHub repo was first created for this project
 - [ ] Public issue tracker (GitHub Issues on this repo)
 - [ ] Short + full plugin descriptions
 - [ ] Screenshots
 - [ ] Documentation URL
-- [ ] Repo renamed to moodle-local_placecom_mcp convention
 - [ ] Disclose MCP/external-AI-service dependency in plugin description
