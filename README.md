@@ -167,18 +167,3 @@ It is declared in `thirdpartylibs.xml`.
 Report bugs and request features at
 <https://github.com/GOJO22G/moodle-local_placecom_mcp/issues>.
 
-## Credits and licence
-
-Developed by AlmaBay Networks Pvt. Ltd. (Placecom). This plugin brings together three
-earlier plugins into one, and builds on the work of others:
-
-- The OAuth 2.0 / OpenID Connect server is based on
-  [`local_oauth2`](https://moodle.org/plugins/local_oauth2) by Enovation Solutions,
-  which was itself forked from `projectestac/moodle-local_oauth`. It has been
-  substantially modified for this plugin.
-- The MCP server is based on `webservice_mcp` by MohammadReza PourMohammad
-  (`onbirdev/moodle-webservice_mcp`).
-
-Original copyright notices are preserved in each file, with Placecom's added alongside.
-
-Licensed under the [GNU GPL v3 or later](LICENSE).
