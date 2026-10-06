@@ -31,6 +31,8 @@ always apply. The assistant never sees more than that user could see in Moodle.
 ## Requirements
 
 - Moodle 4.5 or later.
+- Web services enabled: *Site administration → Advanced features → Enable web services*. This is off on a
+  new Moodle site. When it is off, the MCP endpoint refuses every request.
 - The PHP OpenSSL extension (used once at install time to generate the signing key pair).
   On some Windows servers (for example XAMPP) PHP cannot find OpenSSL's configuration file and
   key generation fails. If that happens, set `$CFG->opensslcnf` in `config.php` to the full path of
@@ -104,6 +106,19 @@ All URLs are relative to your Moodle site URL.
 | User info | `/local/placecom_mcp/userinfo.php` |
 | JWKS | `/local/placecom_mcp/jwks.php` |
 
+### Discovery addresses
+
+The plugin publishes its sign-in settings at `/local/placecom_mcp/openid_configuration.php`. Some MCP
+clients instead look for the standard `/.well-known/...` addresses. If your client cannot find the sign-in
+settings, point those addresses at the same page. For Apache, with Moodle at `/moodle`, add this to the
+server configuration (adjust the path, or drop `/moodle` if Moodle is at the web root):
+
+```
+RewriteEngine On
+RewriteRule ^/\.well-known/(oauth-authorization-server|openid-configuration)/moodle/?$ /moodle/local/placecom_mcp/openid_configuration.php [PT,L]
+RewriteRule ^/moodle/\.well-known/(oauth-authorization-server|openid-configuration)/?$ /moodle/local/placecom_mcp/openid_configuration.php [PT,L]
+```
+
 ## What the assistant can access
 
 The allowlist lives in `classes/local/approved_functions.php` and is the single source
@@ -132,7 +147,8 @@ increase the plugin version so Moodle re-syncs the external service on upgrade.
   the token was issued.
 - OAuth client secrets are stored hashed.
 - Administrators can switch the MCP endpoint off at any time and can revoke tokens from
-  the *Manage tokens* page.
+  the *Manage tokens* page. Revoking a token takes effect immediately and also removes all of that user's
+  other MCP tokens, so they must sign in again.
 
 ## Privacy
 

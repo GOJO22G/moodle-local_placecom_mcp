@@ -50,6 +50,15 @@ require('../../config.php');
 // permanently return 403 to everyone, forever, regardless of any setting.
 // Replaced with a normal plugin setting instead (Site administration > Server >
 // Placecom MCP Connector > "Enable MCP server"), defaulting to enabled.
+// Honour Moodle's master switch (Site administration > Advanced features > Enable web services), exactly as
+// Moodle's own web service protocols do. The old webservice_mcp got this for free through
+// webservice_protocol_is_enabled(); when web services are off, no web service endpoint may answer.
+if (empty($CFG->enablewebservices)) {
+    header("HTTP/1.0 403 Forbidden");
+    debugging('The server died because web services are not enabled in Advanced features', DEBUG_DEVELOPER);
+    die;
+}
+
 // get_config() returns false when the setting has never been saved (for example when the admin skipped
 // the "New settings" page after installing). The default is "on", so only an explicit "off" blocks.
 $mcpserverenabled = get_config('local_placecom_mcp', 'enable_mcp_server');

@@ -73,6 +73,103 @@ class server extends webservice_base_server {
     }
 
     /**
+     * Authenticate the user making this request.
+     *
+     * This replaces webservice_server::authenticate_user() from Moodle core. The core method ends with a
+     * hard-coded check for the capability "webservice/<protocol name>:use", which here is
+     * "webservice/mcp:use". Only a plugin of type "webservice" can declare a capability with that prefix.
+     * This is a "local" plugin, and every name it declares must use its own prefix, so that capability does
+     * not exist. Moodle's has_capability() returns false for a capability that does not exist, even for
+     * administrators, so with the core method every request would be refused.
+     *
+     * Everything else mirrors the core method of Moodle 4.5: the token is validated by
+     * authenticate_by_token(), the state of the user is checked, and the user is logged in for this request.
+     * The one difference is that the final check uses local/placecom_mcp:use. Only permanent tokens are
+     * accepted, which is what the OAuth bridge in observers.php issues.
+     *
+     * @return void
+     */
+    protected function authenticate_user() {
+        global $CFG;
+
+        if (!NO_MOODLE_COOKIES) {
+            throw new \coding_exception('Cookies must be disabled in WS servers!');
+        }
+
+        $loginfaileddefaultparams = [
+            'other' => [
+                'method' => $this->authmethod,
+                'reason' => null,
+            ],
+        ];
+
+        $user = $this->authenticate_by_token(EXTERNAL_TOKEN_PERMANENT);
+
+        // Cannot authenticate unless maintenance access is granted.
+        $hasmaintenanceaccess = has_capability('moodle/site:maintenanceaccess', \context_system::instance(), $user);
+        if (!empty($CFG->maintenance_enabled) && !$hasmaintenanceaccess) {
+            throw new moodle_exception('sitemaintenance', 'admin');
+        }
+
+        // Only existing, confirmed and active users may call web services.
+        if (!empty($user->deleted)) {
+            $this->reject_user($loginfaileddefaultparams, 'user_deleted', $user, 'wsaccessuserdeleted');
+        }
+        if (empty($user->confirmed)) {
+            $this->reject_user($loginfaileddefaultparams, 'user_unconfirmed', $user, 'wsaccessuserunconfirmed');
+        }
+        if (!empty($user->suspended)) {
+            // Core logs suspended users with the reason "user_unconfirmed"; kept identical here.
+            $this->reject_user($loginfaileddefaultparams, 'user_unconfirmed', $user, 'wsaccessusersuspended');
+        }
+
+        // Refuse users whose credentials have expired.
+        $auth = get_auth_plugin($user->auth);
+        if (!empty($auth->config->expiration) && $auth->config->expiration == 1) {
+            $days2expire = $auth->password_expire($user->username);
+            if (intval($days2expire) < 0) {
+                $this->reject_user($loginfaileddefaultparams, 'password_expired', $user, 'wsaccessuserexpired');
+            }
+        }
+
+        // Refuse accounts that may not log in.
+        if ($user->auth == 'nologin') {
+            $this->reject_user($loginfaileddefaultparams, 'login', $user, 'wsaccessusernologin');
+        }
+
+        // Log the user in for the duration of this request. The session is completely empty.
+        enrol_check_plugins($user, false);
+        \core\session\manager::set_user($user);
+        set_login_session_preferences();
+        $this->userid = $user->id;
+
+        if (!has_capability('local/placecom_mcp:use', $this->restricted_context)) {
+            throw new \webservice_access_exception('You are not allowed to use the MCP server '
+                . '(missing capability: local/placecom_mcp:use)');
+        }
+
+        external_api::set_context_restriction($this->restricted_context);
+    }
+
+    /**
+     * Log a failed web service login and refuse the request.
+     *
+     * @param array $baseparams Event parameters shared by all failed logins.
+     * @param string $reason Why the login failed, for the log.
+     * @param stdClass $user The user that was refused.
+     * @param string $errorcode String identifier in the "webservice" component describing the failure.
+     * @return void
+     */
+    private function reject_user(array $baseparams, string $reason, stdClass $user, string $errorcode): void {
+        $params = $baseparams;
+        $params['other']['reason'] = $reason;
+        $params['other']['username'] = $user->username;
+        $event = \core\event\webservice_login_failed::create($params);
+        $event->trigger();
+        throw new moodle_exception($errorcode, 'webservice', '', $user->username);
+    }
+
+    /**
      * Main server execution method.
      *
      * Handles the complete request lifecycle: parsing, authentication,
@@ -449,7 +546,7 @@ class server extends webservice_base_server {
         }
 
         return [
-            'jsonrpc' => $this->mcprequest->id ?? '2.0',
+            'jsonrpc' => '2.0',
             'error' => [
                 'code' => -32603,
                 'message' => $ex->getMessage(),
