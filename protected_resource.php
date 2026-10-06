@@ -1,4 +1,3 @@
- 
 <?php
 // This file is part of Moodle - http://moodle.org/
 //
@@ -23,6 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+// This is a public discovery document (RFC 9728) that must be readable before any sign-in. It contains
+// only this site's own addresses and no user data, so there is nothing to protect with a login.
+// phpcs:ignore moodle.Files.RequireLogin.Missing -- Public discovery document, contains no user data.
 require(__DIR__ . '/../../config.php');
 
 header('Content-Type: application/json');

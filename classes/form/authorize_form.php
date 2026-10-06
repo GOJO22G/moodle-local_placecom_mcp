@@ -67,7 +67,7 @@ class authorize_form extends moodleform {
             }
             $scopetext .= html_writer::end_tag('ul');
         } else {
-            $scopetext .= get_string('oauth_scope_login', 'local_placecom_mcp');
+            $scopetext .= ' ' . get_string('oauth_scope_login', 'local_placecom_mcp');
         }
         $mform->addElement('html', $scopetext);
 

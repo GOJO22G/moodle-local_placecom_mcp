@@ -220,6 +220,8 @@ class server extends webservice_base_server {
         parent::set_web_service_call_settings();
 
         $this->token = $this->extract_token();
+        // Moodle has no API for the HTTP method of the current request. The value is only compared with
+        // fixed strings (GET, POST, OPTIONS) and is never output or stored.
         $this->httpmethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
         if ($this->httpmethod === 'POST' && !request::is_raw_input_empty()) {
@@ -275,7 +277,10 @@ class server extends webservice_base_server {
             $auth = $headers['authorization'] ?? null;
         }
 
-        // Fallback to $_SERVER keys (common in CGI/FPM).
+        // Fallback to $_SERVER keys (common in CGI/FPM). Moodle's parameter functions only read GET and POST
+        // data, so a bearer token sent in a header has to be read from the server variables. The value is
+        // matched against a strict pattern below and is then only used as a bound query parameter when the
+        // token is looked up. It is never output and never concatenated into SQL.
         if ($auth === null) {
             $keys = [
                 'HTTP_AUTHORIZATION', 'REDIRECT_HTTP_AUTHORIZATION', 'Authorization',
@@ -726,27 +731,17 @@ class server extends webservice_base_server {
     }
 
     /**
-     * Custom exception handler that adds RFC 9728 Protected Resource
-     * Metadata discovery info to 401 responses, so OAuth clients (like
-     * Claude) can auto-discover where to authenticate.
+     * Verify that the token may call the function it is about to call.
      *
-     * @copyright 2026 AlmaBay Networks Pvt. Ltd.
-     */
-      
-          /**
-     * Verify the token's granted OAuth scope permits the function it is about to call.
+     * Every function, read or write, must be on the reviewed allowlist in approved_functions.php.
+     * Read functions need nothing more. Write functions also require the token's granted OAuth scope
+     * (recorded in local_placecom_mcp_token_scope by classes/observers.php) to include moodle_mcp_write.
+     * A token with no scope record, such as an administrator-created token that was not issued through
+     * OAuth sign-in, is refused for write functions because its scope cannot be confirmed.
+     * Moodle's own per-function capability checks still apply downstream in every case.
      *
-     * Read-type functions are unrestricted. Write-type functions require the token's
-     * granted scope (as recorded in local_placecom_mcp_token_scope by
-     * classes/observers.php) to include moodle_mcp_write.
-     *
-     * Tokens with no matching local_placecom_mcp_token_scope record (e.g. an
-     * admin-generated manual token, not created via OAuth login) are left
-     * unrestricted here - Moodle's own per-function capability checks still
-     * apply downstream regardless.
-     *
-     * @throws \core\exception\moodle_exception If a write function is called without
-     *         the moodle_mcp_write scope granted.
+     * @throws \core\exception\moodle_exception If the function is not approved, or a write function is
+     *         called without the moodle_mcp_write scope.
      */
     private function enforce_scope(): void {
         global $DB;
@@ -786,6 +781,15 @@ class server extends webservice_base_server {
             throw new moodle_exception('err_scope_insufficient', 'local_placecom_mcp');
         }
     }
+
+    /**
+     * Custom exception handler that adds RFC 9728 Protected Resource
+     * Metadata discovery info to 401 responses, so OAuth clients (like
+     * Claude) can auto-discover where to authenticate.
+     *
+     * @param \Throwable $ex The exception to report.
+     * @return void
+     */
     public function exception_handler($ex): void {
         global $CFG;
 
@@ -806,7 +810,3 @@ class server extends webservice_base_server {
         die;
     }
 }
-
-
-
-

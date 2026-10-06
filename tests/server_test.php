@@ -184,43 +184,58 @@ final class server_test extends advanced_testcase {
     }
 
     /**
-     * Test extract_token from URL parameter.
+     * Call the protected extract_token() method of a fresh server.
+     *
+     * @return string|null The token that was found, or null.
      */
-    public function test_extract_token_from_url(): void {
-        $this->resetAfterTest(true);
-
-        $_GET['wstoken'] = 'test_token_123';
-
+    private function call_extract_token(): ?string {
         $server = new server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
 
         $reflection = new ReflectionClass($server);
         $method = $reflection->getMethod('extract_token');
         $method->setAccessible(true);
 
-        $token = $method->invoke($server);
+        return $method->invoke($server);
+    }
 
-        $this->assertEquals('test_token_123', $token);
+    /**
+     * A bearer token in the Authorization header is accepted.
+     */
+    public function test_extract_token_from_authorization_header(): void {
+        $this->resetAfterTest(true);
+
+        $_SERVER['HTTP_AUTHORIZATION'] = 'Bearer test_token_789';
+
+        $this->assertEquals('test_token_789', $this->call_extract_token());
+
+        unset($_SERVER['HTTP_AUTHORIZATION']);
+    }
+
+    /**
+     * A token in the URL must be ignored: only the Authorization header is accepted.
+     *
+     * Query strings end up in server logs, browser history and referrer headers, so accepting a
+     * credential there would leak it.
+     */
+    public function test_extract_token_ignores_url_parameter(): void {
+        $this->resetAfterTest(true);
+
+        $_GET['wstoken'] = 'test_token_123';
+
+        $this->assertNull($this->call_extract_token());
 
         unset($_GET['wstoken']);
     }
 
     /**
-     * Test extract_token from POST parameter.
+     * A token in the POST body must be ignored: only the Authorization header is accepted.
      */
-    public function test_extract_token_from_post(): void {
+    public function test_extract_token_ignores_post_parameter(): void {
         $this->resetAfterTest(true);
 
         $_POST['wstoken'] = 'test_token_456';
 
-        $server = new server(WEBSERVICE_AUTHMETHOD_PERMANENT_TOKEN);
-
-        $reflection = new ReflectionClass($server);
-        $method = $reflection->getMethod('extract_token');
-        $method->setAccessible(true);
-
-        $token = $method->invoke($server);
-
-        $this->assertEquals('test_token_456', $token);
+        $this->assertNull($this->call_extract_token());
 
         unset($_POST['wstoken']);
     }

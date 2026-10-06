@@ -66,6 +66,7 @@ class access_token_revoked extends base {
      */
     public function get_description() {
         $clientid = $this->data['other']['clientid'] ?? '';
-        return "Access token for user id " . $this->relateduserid . " (client " . $clientid . ") was manually revoked by user id " . $this->userid . ".";
+        return "Access token for user id " . $this->relateduserid . " (client " . $clientid .
+            ") was manually revoked by user id " . $this->userid . ".";
     }
 }

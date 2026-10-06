@@ -55,7 +55,10 @@ class oauth_clients_table extends html_table {
         $clients = $DB->get_records('local_placecom_mcp_client');
         foreach ($clients as $client) {
             $editurl = new moodle_url('/local/placecom_mcp/manage_oauth_clients.php', ['id' => $client->id, 'action' => 'edit']);
-            $deleteurl = new moodle_url('/local/placecom_mcp/manage_oauth_clients.php', ['id' => $client->id, 'action' => 'delete']);
+            $deleteurl = new moodle_url(
+                '/local/placecom_mcp/manage_oauth_clients.php',
+                ['id' => $client->id, 'action' => 'delete']
+            );
             $actions = html_writer::link($editurl, get_string('edit')) . ' | ' .
                 html_writer::link($deleteurl, get_string('delete'));
             $row = [

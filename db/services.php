@@ -52,10 +52,10 @@ $approvedfunctionnames = \local_placecom_mcp\local\approved_functions::LIST;
 $services = [
     'Placecom MCP Service' => [
         'functions'       => $approvedfunctionnames,
-        'restrictedusers' => 0,   // any authorised user's bridged token works - no per-user manual authorisation step
-        'enabled'         => 1,   // on immediately after install, no manual toggle
+        'restrictedusers' => 0, // Any authorised user's bridged token works - no per-user manual authorisation step.
+        'enabled'         => 1, // On immediately after install, no manual toggle.
         'shortname'       => 'placecom_mcp_service',
-        'downloadfiles'   => 1,   // needed for resource extraction
+        'downloadfiles'   => 1, // Needed for resource extraction.
         'uploadfiles'     => 0,
     ],
 ];

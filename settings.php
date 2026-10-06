@@ -55,7 +55,10 @@ if ($hassiteconfig) {
     );
 
     // Add plugin configuration page.
-    $settings = new admin_settingpage('local_placecom_mcp_token_lifetime', get_string('settings_token_settings', 'local_placecom_mcp'));
+    $settings = new admin_settingpage(
+        'local_placecom_mcp_token_lifetime',
+        get_string('settings_token_settings', 'local_placecom_mcp')
+    );
     $ADMIN->add('local_placecom_mcp', $settings);
 
     // Master on/off switch for the MCP server endpoint (server.php).

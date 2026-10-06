@@ -37,6 +37,9 @@ define('NO_DEBUG_DISPLAY', true);
 // Mark this as a web service server script.
 define('WS_SERVER', true);
 
+// This endpoint is not session based. Every request is authenticated by its OAuth bearer token inside
+// classes/local/server.php, which logs in the token's user, so require_login() would be wrong here.
+// phpcs:ignore moodle.Files.RequireLogin.Missing -- Token authenticated endpoint, see the server class.
 require('../../config.php');
 
 // Check if the MCP server is enabled via this plugin's own setting.
@@ -59,7 +62,7 @@ if (empty($CFG->enablewebservices)) {
     die;
 }
 
-// get_config() returns false when the setting has never been saved (for example when the admin skipped
+// The get_config() function returns false when the setting has never been saved (for example when the admin skipped
 // the "New settings" page after installing). The default is "on", so only an explicit "off" blocks.
 $mcpserverenabled = get_config('local_placecom_mcp', 'enable_mcp_server');
 if ($mcpserverenabled !== false && !$mcpserverenabled) {

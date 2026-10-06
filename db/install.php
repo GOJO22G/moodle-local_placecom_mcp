@@ -42,8 +42,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Post installation hook: seeds default OAuth2/OIDC scopes and generates the
  * default RSA key pair used to sign OpenID Connect ID tokens.

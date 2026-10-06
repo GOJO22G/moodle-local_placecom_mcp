@@ -227,6 +227,12 @@ class moodle_oauth_storage implements
         return hash('sha256', $token);
     }
 
+    /**
+     * Look up an access token by its raw value.
+     *
+     * @param string $oauthtoken The raw access token string sent by the client.
+     * @return array|false The token details, or false when no such token exists.
+     */
     public function getAccessToken($oauthtoken) {
         global $DB;
 
@@ -787,7 +793,13 @@ class moodle_oauth_storage implements
     public function getDefaultScope($clientid = null) {
         global $DB;
 
-        if ($scope = $DB->get_fieldset_select('local_placecom_mcp_scope', 'scope', 'is_default = :is_default', ['is_default' => true])) {
+        $scope = $DB->get_fieldset_select(
+            'local_placecom_mcp_scope',
+            'scope',
+            'is_default = :is_default',
+            ['is_default' => true]
+        );
+        if ($scope) {
             return implode(' ', $scope);
         }
 

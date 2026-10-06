@@ -98,7 +98,12 @@ class oauth_client_form extends moodleform {
             $mform->addElement('advcheckbox', 'generate_secret', get_string('oauth_generate_secret', 'local_placecom_mcp'));
             $mform->setType('generate_secret', PARAM_INT);
             $mform->setDefault('generate_secret', 1);
-            $mform->addElement('static', 'generate_secret_help', '', get_string('oauth_generate_secret_help', 'local_placecom_mcp'));
+            $mform->addElement(
+                'static',
+                'generate_secret_help',
+                '',
+                get_string('oauth_generate_secret_help', 'local_placecom_mcp')
+            );
 
             // Disable generate_secret unless require_pkce is enabled.
             $mform->disabledIf('generate_secret', 'require_pkce', 'eq', 0);

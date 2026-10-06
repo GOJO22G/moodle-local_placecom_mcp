@@ -24,81 +24,51 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$string['pluginname'] = 'Placecom MCP Connector';
-$string['placecom_mcp:use'] = 'Use the Placecom MCP connector';
-$string['placecom_mcp:manage_oauth_clients'] = 'Manage OAuth2 clients for the Placecom MCP connector';
-
-
-// ---------------------------------------------------------------------
-// Strings below are ported from local_oauth2 (OAuth2 Server, Enovation
-// Solutions), as part of the local_oauth2 -> local_placecom_mcp merge.
-// ---------------------------------------------------------------------
-
-defined('MOODLE_INTERNAL') || die();
-
-// phpcs:disable moodle.Files.LangFilesOrdering.IncorrectOrder -- The strings are organised by features.
-// phpcs:disable moodle.Files.LangFilesOrdering.UnexpectedComment -- The strings are organised by features.
-
-// General strings.
-// Privacy Subsystem.
-$string['privacy:metadata:local_placecom_mcp_user_auth_scope'] = 'Information about the scopes that a user has granted to an OAuth2 client.';
-$string['privacy:metadata:local_placecom_mcp_user_auth_scope:user_id'] = 'The ID of the user who granted the scope.';
-$string['privacy:metadata:local_placecom_mcp_user_auth_scope:client_id'] = 'The ID of the OAuth2 client.';
-$string['privacy:metadata:local_placecom_mcp_user_auth_scope:scope'] = 'The scope that the user has granted to the OAuth2 client.';
-$string['privacy:metadata:local_placecom_mcp_access_token'] = 'Information about the access tokens issued to users.';
-$string['privacy:metadata:local_placecom_mcp_access_token:user_id'] = 'The ID of the user to whom the access token was issued.';
-$string['privacy:metadata:local_placecom_mcp_access_token:client_id'] = 'The ID of the OAuth2 client to which the access token was issued.';
-$string['privacy:metadata:local_placecom_mcp_access_token:scope'] = 'The scope of the access token.';
-$string['privacy:metadata:local_placecom_mcp_access_token:access_token'] = 'The access token issued to the user.';
-$string['privacy:metadata:local_placecom_mcp_access_token:expires'] = 'The expiration time of the access token.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code'] = 'Information about the authorization codes issued to users.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:user_id'] = 'The ID of the user to whom the authorization code was issued.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:authorization_code'] = 'The authorization code issued to the user.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:client_id'] = 'The ID of the OAuth2 client to which the authorization code was issued.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:redirect_uri'] = 'The redirect URI of the OAuth2 client to which the authorization code was issued.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:expires'] = 'The expiration time of the authorization code.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:scope'] = 'The scope of the authorization code.';
-$string['privacy:metadata:local_placecom_mcp_authorization_code:id_token'] = 'The ID token issued to the user.';
-$string['privacy:metadata:local_placecom_mcp_refresh_token'] = 'Information about the refresh tokens issued to users.';
-$string['privacy:metadata:local_placecom_mcp_refresh_token:user_id'] = 'The ID of the user to whom the refresh token was issued.';
-$string['privacy:metadata:local_placecom_mcp_refresh_token:client_id'] = 'The ID of the OAuth2 client to which the refresh token was issued.';
-$string['privacy:metadata:local_placecom_mcp_refresh_token:expires'] = 'The expiration time of the refresh token.';
-$string['privacy:metadata:local_placecom_mcp_refresh_token:scope'] = 'The scope of the refresh token.';
-$string['privacy:metadata:local_placecom_mcp_token_scope'] = 'Records the OAuth scope that was granted when a web service token was issued to a user, so that read and write permissions can be enforced. A record belongs to a user through the token it describes.';
-$string['privacy:metadata:local_placecom_mcp_token_scope:token'] = 'The web service token that the scope applies to.';
-$string['privacy:metadata:local_placecom_mcp_token_scope:scope'] = 'The OAuth scope that was granted when the token was issued.';
-$string['privacy:metadata:local_placecom_mcp_token_scope:timecreated'] = 'The time the record was created.';
-$string['privacy:metadata:core_external'] = 'A web service token is created for each user who authorises an AI assistant, so that the MCP server can authenticate the assistant. These tokens are stored by the Moodle web services subsystem.';
-$string['privacy:metadata:mcp_assistant'] = 'When a user authorises an AI assistant (an MCP client) to access Moodle, data about that user is sent to the assistant. The assistant provider handles that data under its own terms and privacy policy.';
-$string['privacy:metadata:mcp_assistant:identity'] = 'Identity details released through OpenID Connect, depending on the scopes the user grants: user ID, username, name, email address, picture, address and phone number.';
-$string['privacy:metadata:mcp_assistant:moodledata'] = 'The results of the approved web service functions that the assistant calls for the user, such as courses, activities, completion, badges, files, grades, calendar events and forum content that the user can access in Moodle.';
-$string['privacy:metadata:local_placecom_mcp_refresh_token:refresh_token'] = 'The refresh token issued to the user.';
-
-// Capabilities.
-
-// Events.
-$string['event_user_granted'] = 'User granted access to OAuth2 server';
-$string['event_user_not_granted'] = 'User did not grant access to OAuth2 server';
+$string['actions'] = 'Actions';
+$string['delete_oauth_client_confirm'] = 'Are you sure you want to delete this OAuth client?';
+$string['err_empty_request'] = 'Request body is empty';
+$string['err_function_not_approved'] = 'This function is not on the approved list for this MCP server';
+$string['err_invalid_json'] = 'Invalid JSON';
+$string['err_invalid_jsonrpc'] = 'Invalid JSON-RPC version';
+$string['err_missing_method'] = 'Missing method';
+$string['err_missing_tool_name'] = 'Missing tool name';
+$string['err_scope_insufficient'] = 'This token does not have permission to call write functions';
+$string['error_creating_oauth_client'] = 'Error occurred while creating OAuth client';
+$string['error_deleting_oauth_client'] = 'Error occurred while deleting OAuth client';
+$string['error_updating_oauth_client'] = 'Error occurred while updating OAuth client';
 $string['event_access_token_created'] = 'Access token created';
-$string['event_access_token_updated'] = 'Access token updated';
 $string['event_access_token_deleted'] = 'Access token deleted';
 $string['event_access_token_revoked'] = 'Access token revoked';
-
-// Tasks.
-$string['task_cleanup'] = 'Clean up expired auth codes and tokens';
-
-// OAuth client configuration.
+$string['event_access_token_updated'] = 'Access token updated';
+$string['event_user_granted'] = 'User granted access to OAuth2 server';
+$string['event_user_not_granted'] = 'User did not grant access to OAuth2 server';
+$string['expired'] = 'expired';
 $string['manage_oauth_clients'] = 'Manage OAuth clients';
-$string['oauth_client_details'] = 'Client details';
+$string['manage_tokens'] = 'Manage active tokens';
+$string['no_active_tokens'] = 'No active tokens found.';
+$string['not_implemented'] = 'Not implemented';
 $string['oauth_add_client'] = 'Add OAuth client';
+$string['oauth_auth_question'] = 'Do you want to authorize application <b>{$a}</b> to access your Moodle account?</br>';
+$string['oauth_client_changes_saved'] = 'OAuth client changes saved';
+$string['oauth_client_details'] = 'Client details';
 $string['oauth_client_id'] = 'Client ID';
-$string['oauth_client_secret'] = 'Client Secret';
+$string['oauth_client_id_already_exists'] = 'Client ID already exists';
+$string['oauth_client_id_cannot_contain_space'] = 'Client ID cannot contain space';
 $string['oauth_client_id_help'] = 'Client ID for the OAuth client.';
+$string['oauth_client_not_exists'] = 'Oauth client does not exist';
+$string['oauth_client_secret'] = 'Client Secret';
+$string['oauth_client_secret_shown_once'] = 'Client secret: {$a} - copy this now, it will not be shown again.';
+$string['oauth_generate_secret'] = 'Generate client secret';
+$string['oauth_generate_secret_help'] = 'Generate a client secret for this registration. Uncheck this to create a public client without a secret. Public clients must have PKCE enabled.';
 $string['oauth_redirect_uri'] = 'Redirect URI';
 $string['oauth_redirect_uri_help'] = 'Redirect URI for the OAuth client.';
 $string['oauth_redirect_uri_help_local_copilot'] = '<br/>
 For Microsoft 365 Copilot integration, use: <b>https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect</b>';
+$string['oauth_require_pkce'] = 'Require PKCE';
+$string['oauth_require_pkce_help'] = 'Require PKCE (Proof Key for Code Exchange) for this client. PKCE provides additional security against authorization code interception attacks. Recommended for public clients such as mobile apps and single-page applications.';
 $string['oauth_scope'] = 'Scope';
+$string['oauth_scope_address'] = 'Address information';
+$string['oauth_scope_email'] = 'Email address';
 $string['oauth_scope_help'] = 'Scope for the OAuth client.';
 $string['oauth_scope_help_local_copilot'] = '<br/>
 Separate multiple scopes with a space.</br>
@@ -107,86 +77,79 @@ For Microsoft 365 Copilot integration, this should be:
 <li><b>teacher.read teacher.write</b> for the teacher OAuth2 client</li>
 <li><b>student.read student.write</b> for the student OAuth2 client</li>
 </ul>';
-$string['oauth_require_pkce'] = 'Require PKCE';
-$string['oauth_require_pkce_help'] = 'Require PKCE (Proof Key for Code Exchange) for this client. PKCE provides additional security against authorization code interception attacks. Recommended for public clients such as mobile apps and single-page applications.';
-$string['oauth_generate_secret'] = 'Generate client secret';
-$string['oauth_generate_secret_help'] = 'Generate a client secret for this registration. Uncheck this to create a public client without a secret. Public clients must have PKCE enabled.';
-$string['actions'] = 'Actions';
-$string['oauth_client_not_exists'] = 'Oauth client does not exist';
-$string['oauth_client_id_cannot_contain_space'] = 'Client ID cannot contain space';
-$string['oauth_client_id_already_exists'] = 'Client ID already exists';
-$string['oauth_client_changes_saved'] = 'OAuth client changes saved';
-$string['oauth_client_secret_shown_once'] = 'Client secret: {$a} - copy this now, it will not be shown again.';
-$string['delete_oauth_client_confirm'] = 'Are you sure you want to delete this OAuth client?';
-$string['error_creating_oauth_client'] = 'Error occurred while creating OAuth client';
-$string['error_deleting_oauth_client'] = 'Error occurred while deleting OAuth client';
-$string['error_updating_oauth_client'] = 'Error occurred while updating OAuth client';
-$string['not_implemented'] = 'Not implemented';
-$string['settings_token_settings'] = 'Token settings';
-$string['settings_enable_mcp_server'] = 'Enable MCP server';
-$string['settings_enable_mcp_server_desc'] = 'Turns the MCP (Model Context Protocol) server endpoint on or off. When disabled, server.php refuses all requests regardless of a valid token or capability. Replaces the old Site Admin > Server > Web services > Manage protocols toggle, which no longer applies now that this is a "local" plugin rather than a "webservice" plugin.';
-$string['settings_serviceid'] = 'Web service ID to bridge (optional override)';
-$string['settings_serviceid_desc'] = 'Leave blank to use the "Placecom MCP Service" this plugin creates automatically on install. Only set this if you want OAuth tokens bridged into a different, already-existing external service instead - enter its numeric ID, found in the URL when editing the service under Site administration > Server > Web services > External services (e.g. .../service.php?id=2 means the ID is 2).';
-$string['task_cleanup_orphaned_scope'] = 'Clean up orphaned MCP bridge token scope records';
-$string['settings_access_token_lifetime'] = 'Access token lifetime';
-$string['settings_access_token_lifetime_desc'] = 'The period of time that the access token is valid for';
-$string['settings_refresh_token_lifetime'] = 'Refresh token lifetime';
-$string['settings_refresh_token_lifetime_desc'] = 'The period of time that the refresh token is valid for';
-$string['settings_issuer'] = 'OIDC issuer';
-$string['settings_issuer_desc'] = 'Optional public issuer URL for OpenID Connect metadata and ID tokens. Leave empty to use Moodle\'s $CFG->wwwroot value.';
-
-// OAuth endpoints.
-$string['oauth_userinfo_endpoint'] = 'UserInfo endpoint';
-$string['oauth_userinfo_endpoint_desc'] = 'Returns OpenID Connect UserInfo claims about the authenticated user. Requires a valid access token with the openid scope.';
-
-// OAuth scopes.
-$string['oauth_scope_openid'] = 'OpenID authentication';
-$string['oauth_scope_profile'] = 'Profile information (name, picture, etc.)';
-$string['oauth_scope_email'] = 'Email address';
+$string['oauth_scope_list'] = 'The application is to access the following data:';
+$string['oauth_scope_login'] = 'Login';
 $string['oauth_scope_offline_access'] = 'Offline access (issue refresh tokens for OpenID Connect clients)';
-$string['oauth_scope_address'] = 'Address information';
+$string['oauth_scope_openid'] = 'OpenID authentication';
 $string['oauth_scope_phone'] = 'Phone number';
-
-// Custom scopes for Microsoft 365 Copilot integration.
-$string['oauth_scope_teacher.read'] = 'Read teacher information';
-$string['oauth_scope_teacher.write'] = 'Modify teacher information';
+$string['oauth_scope_profile'] = 'Profile information (name, picture, etc.)';
 $string['oauth_scope_student.read'] = 'Read student information';
 $string['oauth_scope_student.write'] = 'Modify student information';
+$string['oauth_scope_teacher.read'] = 'Read teacher information';
+$string['oauth_scope_teacher.write'] = 'Modify teacher information';
+$string['oauth_userinfo_endpoint'] = 'UserInfo endpoint';
+$string['oauth_userinfo_endpoint_desc'] = 'Returns OpenID Connect UserInfo claims about the authenticated user. Requires a valid access token with the openid scope.';
+$string['placecom_mcp:manage_oauth_clients'] = 'Manage OAuth2 clients for the Placecom MCP connector';
+$string['placecom_mcp:use'] = 'Use the Placecom MCP connector';
+$string['pluginname'] = 'Placecom MCP Connector';
 
-// OAuth client configuration.
-$string['oauth_auth_question'] = 'Do you want to authorize application <b>{$a}</b> to access your Moodle account?</br>';
-$string['oauth_scope_list'] = 'The application is to access the following data: ';
-$string['oauth_scope_login'] = 'Login';
+$string['privacy:metadata:core_external'] = 'A web service token is created for each user who authorises an AI assistant, so that the MCP server can authenticate the assistant. These tokens are stored by the Moodle web services subsystem.';
+$string['privacy:metadata:local_placecom_mcp_access_token'] = 'Information about the access tokens issued to users.';
+$string['privacy:metadata:local_placecom_mcp_access_token:access_token'] = 'The access token issued to the user.';
+$string['privacy:metadata:local_placecom_mcp_access_token:client_id'] = 'The ID of the OAuth2 client to which the access token was issued.';
+$string['privacy:metadata:local_placecom_mcp_access_token:expires'] = 'The expiration time of the access token.';
+$string['privacy:metadata:local_placecom_mcp_access_token:scope'] = 'The scope of the access token.';
+$string['privacy:metadata:local_placecom_mcp_access_token:user_id'] = 'The ID of the user to whom the access token was issued.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code'] = 'Information about the authorization codes issued to users.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:authorization_code'] = 'The authorization code issued to the user.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:client_id'] = 'The ID of the OAuth2 client to which the authorization code was issued.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:expires'] = 'The expiration time of the authorization code.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:id_token'] = 'The ID token issued to the user.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:redirect_uri'] = 'The redirect URI of the OAuth2 client to which the authorization code was issued.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:scope'] = 'The scope of the authorization code.';
+$string['privacy:metadata:local_placecom_mcp_authorization_code:user_id'] = 'The ID of the user to whom the authorization code was issued.';
+$string['privacy:metadata:local_placecom_mcp_refresh_token'] = 'Information about the refresh tokens issued to users.';
+$string['privacy:metadata:local_placecom_mcp_refresh_token:client_id'] = 'The ID of the OAuth2 client to which the refresh token was issued.';
+$string['privacy:metadata:local_placecom_mcp_refresh_token:expires'] = 'The expiration time of the refresh token.';
+$string['privacy:metadata:local_placecom_mcp_refresh_token:refresh_token'] = 'The refresh token issued to the user.';
+$string['privacy:metadata:local_placecom_mcp_refresh_token:scope'] = 'The scope of the refresh token.';
+$string['privacy:metadata:local_placecom_mcp_refresh_token:user_id'] = 'The ID of the user to whom the refresh token was issued.';
+$string['privacy:metadata:local_placecom_mcp_token_scope'] = 'Records the OAuth scope that was granted when a web service token was issued to a user, so that read and write permissions can be enforced. A record belongs to a user through the token it describes.';
+$string['privacy:metadata:local_placecom_mcp_token_scope:scope'] = 'The OAuth scope that was granted when the token was issued.';
+$string['privacy:metadata:local_placecom_mcp_token_scope:timecreated'] = 'The time the record was created.';
+$string['privacy:metadata:local_placecom_mcp_token_scope:token'] = 'The web service token that the scope applies to.';
+$string['privacy:metadata:local_placecom_mcp_user_auth_scope'] = 'Information about the scopes that a user has granted to an OAuth2 client.';
+$string['privacy:metadata:local_placecom_mcp_user_auth_scope:client_id'] = 'The ID of the OAuth2 client.';
+$string['privacy:metadata:local_placecom_mcp_user_auth_scope:scope'] = 'The scope that the user has granted to the OAuth2 client.';
+$string['privacy:metadata:local_placecom_mcp_user_auth_scope:user_id'] = 'The ID of the user who granted the scope.';
+$string['privacy:metadata:mcp_assistant'] = 'When a user authorises an AI assistant (an MCP client) to access Moodle, data about that user is sent to the assistant. The assistant provider handles that data under its own terms and privacy policy.';
+$string['privacy:metadata:mcp_assistant:identity'] = 'Identity details released through OpenID Connect, depending on the scopes the user grants: user ID, username, name, email address, picture, address and phone number.';
+$string['privacy:metadata:mcp_assistant:moodledata'] = 'The results of the approved web service functions that the assistant calls for the user, such as courses, activities, completion, badges, files, grades, calendar events and forum content that the user can access in Moodle.';
 
-// Token management.
-$string['manage_tokens'] = 'Manage active tokens';
-$string['no_active_tokens'] = 'No active tokens found.';
-$string['token_user'] = 'User';
-$string['token_client'] = 'Client';
-$string['token_expires'] = 'Expires';
-$string['expired'] = 'expired';
+
 $string['revoke'] = 'Revoke';
 $string['revoke_confirm'] = 'Are you sure you want to revoke this token? The user will be immediately signed out of this session.';
-$string['token_revoked'] = 'Token revoked successfully.';
+$string['settings_access_token_lifetime'] = 'Access token lifetime';
+$string['settings_access_token_lifetime_desc'] = 'The period of time that the access token is valid for';
+$string['settings_enable_mcp_server'] = 'Enable MCP server';
+$string['settings_enable_mcp_server_desc'] = 'Turns the MCP (Model Context Protocol) server endpoint on or off. When disabled, server.php refuses all requests regardless of a valid token or capability. Replaces the old Site Admin > Server > Web services > Manage protocols toggle, which no longer applies now that this is a "local" plugin rather than a "webservice" plugin.';
+$string['settings_issuer'] = 'OIDC issuer';
+$string['settings_issuer_desc'] = 'Optional public issuer URL for OpenID Connect metadata and ID tokens. Leave empty to use Moodle\'s $CFG->wwwroot value.';
+$string['settings_refresh_token_lifetime'] = 'Refresh token lifetime';
+$string['settings_refresh_token_lifetime_desc'] = 'The period of time that the refresh token is valid for';
+$string['settings_serviceid'] = 'Web service ID to bridge (optional override)';
+$string['settings_serviceid_desc'] = 'Leave blank to use the "Placecom MCP Service" this plugin creates automatically on install. Only set this if you want OAuth tokens bridged into a different, already-existing external service instead - enter its numeric ID, found in the URL when editing the service under Site administration > Server > Web services > External services (e.g. .../service.php?id=2 means the ID is 2).';
+$string['settings_token_settings'] = 'Token settings';
+$string['task_cleanup'] = 'Clean up expired auth codes and tokens';
+
+$string['task_cleanup_orphaned_scope'] = 'Clean up orphaned MCP bridge token scope records';
+
+
+
+
+
+$string['token_client'] = 'Client';
+$string['token_expires'] = 'Expires';
 $string['token_not_found'] = 'Token not found.';
-
-
-// ---------------------------------------------------------------------
-// Strings below are ported from webservice_mcp (MCP web service protocol
-// implementation, originally by MohammadReza PourMohammad), as part of the
-// webservice_mcp -> local_placecom_mcp merge. Note: webservice_mcp's own
-// 'privacy:metadata' string (used by its null_provider - "this plugin stores
-// no personal data") is NOT included here. That claim was only ever true for
-// webservice_mcp in isolation; the merged plugin's privacy provider is
-// local_oauth2's real metadata provider, since the merged plugin as a whole
-// genuinely does process personal data via its OAuth2 core.
-// ---------------------------------------------------------------------
-
-$string['err_empty_request'] = 'Request body is empty';
-$string['err_invalid_json'] = 'Invalid JSON';
-$string['err_invalid_jsonrpc'] = 'Invalid JSON-RPC version';
-$string['err_missing_method'] = 'Missing method';
-$string['err_missing_tool_name'] = 'Missing tool name';
-$string['err_scope_insufficient'] = 'This token does not have permission to call write functions';
-
-$string['err_function_not_approved'] = 'This function is not on the approved list for this MCP server';
+$string['token_revoked'] = 'Token revoked successfully.';
+$string['token_user'] = 'User';

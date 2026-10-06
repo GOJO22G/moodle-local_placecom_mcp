@@ -78,9 +78,9 @@ switch ($action) {
                 // If PKCE is not enabled, always generate a secret.
                 if (empty($fromform->require_pkce) || !empty($fromform->generate_secret)) {
                     $clientrecord->client_secret = utils::generate_secret();
-                $rawsecret = $clientrecord->client_secret;
-                $clientrecord->client_secret_last4 = substr($rawsecret, -4);
-                $clientrecord->client_secret = password_hash($rawsecret, PASSWORD_DEFAULT);
+                    $rawsecret = $clientrecord->client_secret;
+                    $clientrecord->client_secret_last4 = substr($rawsecret, -4);
+                    $clientrecord->client_secret = password_hash($rawsecret, PASSWORD_DEFAULT);
                 } else {
                     $clientrecord->client_secret = '';
                 }

@@ -86,7 +86,7 @@ class tool_provider {
                 continue;
             }
 
-            // readOnlyHint reuses the same 'type' metadata enforce_scope()
+            // The readOnlyHint annotation reuses the same 'type' metadata enforce_scope()
             // relies on for write-permission checks, so both stay consistent.
             // destructiveHint is intentionally NOT set: Moodle's function
             // metadata only distinguishes read/write, not which writes are

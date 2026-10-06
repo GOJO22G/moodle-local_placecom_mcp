@@ -25,10 +25,14 @@
 
 namespace local_placecom_mcp;
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Event observers that bridge OAuth access tokens into Moodle web service tokens.
+ *
+ * @package    local_placecom_mcp
+ * @copyright  2026 AlmaBay Networks Pvt. Ltd. (Placecom)
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class observers {
-
     /**
      * Resolve which external service this plugin should bridge tokens into.
      *
@@ -54,6 +58,9 @@ class observers {
      * whichever web service this plugin is configured to bridge (see
      * settings.php) - so the OAuth token becomes a valid wstoken for that
      * service, without needing a separate admin-generated token per user.
+     *
+     * @param \core\event\base $event The access token created or updated event.
+     * @return void
      */
     public static function handle_access_token_created_or_updated($event) {
         global $DB;
@@ -141,6 +148,9 @@ class observers {
      * service gets deleted. Deliberately broader than "just this one
      * session" - erring toward revoking too much rather than too little,
      * same fail-closed principle used in enforce_scope().
+     *
+     * @param \core\event\base $event The access token revoked event.
+     * @return void
      */
     public static function handle_access_token_revoked($event) {
         global $DB;

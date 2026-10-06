@@ -63,7 +63,7 @@ class approved_functions {
      * @var string[]
      */
     public const LIST = [
-        // Core (lib/db/services.php)
+        // Core (lib/db/services.php).
         'core_webservice_get_site_info',
         'core_course_get_courses_by_field',
         'core_course_get_categories',
@@ -84,37 +84,37 @@ class approved_functions {
         'core_badges_get_user_badges',
         'core_files_get_files',
 
-        // Assignment (mod/assign)
+        // Assignment (mod/assign).
         'mod_assign_get_assignments',
         'mod_assign_get_submission_status',
 
-        // Quiz (mod/quiz)
+        // Quiz (mod/quiz).
         'mod_quiz_get_quizzes_by_courses',
         'mod_quiz_get_user_best_grade',
         'mod_quiz_get_attempt_review',
         'mod_quiz_get_attempt_summary',
 
-        // Forum (mod/forum)
+        // Forum (mod/forum).
         'mod_forum_get_forums_by_courses',
         'mod_forum_get_forum_discussions',
         'mod_forum_get_discussion_posts',
-        'mod_forum_add_discussion',       // write
-        'mod_forum_add_discussion_post',  // write
+        'mod_forum_add_discussion', // Write function.
+        'mod_forum_add_discussion_post', // Write function.
 
-        // Lesson (mod/lesson)
+        // Lesson (mod/lesson).
         'mod_lesson_get_lessons_by_courses',
         'mod_lesson_get_user_attempt',
 
-        // Glossary (mod/glossary)
+        // Glossary (mod/glossary).
         'mod_glossary_get_entries_by_search',
 
-        // Page (mod/page)
+        // Page (mod/page).
         'mod_page_get_pages_by_courses',
 
-        // URL (mod/url)
+        // URL (mod/url).
         'mod_url_get_urls_by_courses',
 
-        // Notifications (message/output/popup)
+        // Notifications (message/output/popup).
         'message_popup_get_unread_popup_notification_count',
     ];
 

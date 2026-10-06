@@ -32,13 +32,10 @@ namespace local_placecom_mcp\task;
 
 use core\task\scheduled_task;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Cleanup task for local_placecom_mcp_token_scope.
  */
 class cleanup_orphaned_scope extends scheduled_task {
-
     /**
      * Get a descriptive name for this task.
      *

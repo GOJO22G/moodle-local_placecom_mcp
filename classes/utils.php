@@ -59,7 +59,7 @@ class utils {
 
         // Chop and send the first 80 characters back to the client.
         return substr($hash, 0, 48);
-}
+    }
 
     /**
      * Get the OAuth server.
@@ -128,7 +128,6 @@ class utils {
 
         // Add the "Authorization Code" grant type.
         $server->addGrantType(new oidc_authorization_code_grant($storage));
-
 
         // Add the "Refresh Token" grant type.
         $server->addGrantType(new RefreshToken($storage, [

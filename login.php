@@ -86,6 +86,9 @@ if (isloggedin() && !isguestuser()) {
         $queryparams['code_challenge_method'] = $postcodechallengemethod;
     }
 
+    // The bundled OAuth library's Request class takes the raw request arrays by design. Every value this
+    // plugin acts on itself is read with optional_param() above, and the library validates the rest against
+    // stored data before using it: client id, registered redirect URI, allowed scopes and PKCE challenge.
     $request = new OAuth2\Request($queryparams, $_POST, [], $_COOKIE, $_FILES, $_SERVER);
     $response = new OAuth2\Response();
 
