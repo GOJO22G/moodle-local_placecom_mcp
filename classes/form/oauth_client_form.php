@@ -66,7 +66,7 @@ class oauth_client_form extends moodleform {
         // Redirect URI.
         $mform->addElement('text', 'redirect_uri', get_string('oauth_redirect_uri', 'local_placecom_mcp'), ['size' => 80]);
         $mform->setType('redirect_uri', PARAM_URL);
-        $mform->setDefault('redirect_uri', 'https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect');
+        $mform->addRule('redirect_uri', get_string('required'), 'required');
         $redirecturihelptext = get_string('oauth_redirect_uri_help', 'local_placecom_mcp');
         if (utils::is_local_copilot_installed()) {
             $redirecturihelptext .= get_string('oauth_redirect_uri_help_local_copilot', 'local_placecom_mcp');
@@ -76,6 +76,7 @@ class oauth_client_form extends moodleform {
         // Scope.
         $mform->addElement('text', 'scope', get_string('oauth_scope', 'local_placecom_mcp'), ['size' => 80]);
         $mform->setType('scope', PARAM_TEXT);
+        $mform->addRule('scope', get_string('required'), 'required');
         $scopehelptext = get_string('oauth_scope_help', 'local_placecom_mcp');
         if (utils::is_local_copilot_installed()) {
             $scopehelptext .= get_string('oauth_scope_help_local_copilot', 'local_placecom_mcp');
@@ -85,7 +86,7 @@ class oauth_client_form extends moodleform {
         // Require PKCE.
         $mform->addElement('advcheckbox', 'require_pkce', get_string('oauth_require_pkce', 'local_placecom_mcp'));
         $mform->setType('require_pkce', PARAM_INT);
-        $mform->setDefault('require_pkce', 0);
+        $mform->setDefault('require_pkce', 1);
         $mform->addElement('static', 'require_pkce_help', '', get_string('oauth_require_pkce_help', 'local_placecom_mcp'));
 
         // Freeze require_pkce when editing - cannot be changed after creation.
@@ -136,6 +137,47 @@ class oauth_client_form extends moodleform {
             $errors['client_id'] = get_string('oauth_client_id_already_exists', 'local_placecom_mcp');
         }
 
+        // Client ID, redirect URI and scope are all required.
+        if (($data['action'] ?? '') === 'add' && trim((string) ($data['client_id'] ?? '')) === '') {
+            $errors['client_id'] = get_string('required');
+        }
+
+        // The redirect URI must be an https address, or http://localhost for local testing.
+        $redirecturi = trim((string) ($data['redirect_uri'] ?? ''));
+        if ($redirecturi === '') {
+            $errors['redirect_uri'] = get_string('required');
+        }
+        if ($redirecturi !== '' && !self::is_allowed_redirect_uri($redirecturi)) {
+            $errors['redirect_uri'] = get_string('oauth_redirect_uri_invalid', 'local_placecom_mcp');
+        }
+
+        // The scope must include moodle_mcp_read. moodle_mcp_write is optional, and only valid together with read.
+        $scopes = preg_split('/\s+/', trim((string) ($data['scope'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
+        if (empty($scopes)) {
+            $errors['scope'] = get_string('required');
+        }
+        if (!empty($scopes) && !in_array('moodle_mcp_read', $scopes, true)) {
+            $errors['scope'] = get_string('oauth_scope_must_include_read', 'local_placecom_mcp');
+        }
+
         return $errors;
+    }
+
+    /**
+     * Whether a redirect URI is allowed: an https:// address, or http://localhost for local testing.
+     *
+     * @param string $uri The redirect URI.
+     * @return bool
+     */
+    private static function is_allowed_redirect_uri(string $uri): bool {
+        $parts = parse_url($uri);
+        if ($parts === false || empty($parts['scheme']) || empty($parts['host'])) {
+            return false;
+        }
+
+        $scheme = strtolower($parts['scheme']);
+        $host = strtolower($parts['host']);
+
+        return $scheme === 'https' || ($scheme === 'http' && $host === 'localhost');
     }
 }

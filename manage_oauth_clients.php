@@ -120,7 +120,7 @@ switch ($action) {
             $formdata->client_id = '';
             $formdata->redirect_uri = '';
             $formdata->scope = '';
-            $formdata->require_pkce = 0;
+            $formdata->require_pkce = 1;
             $formdata->action = 'add';
         }
         $form->set_data($formdata);
