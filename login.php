@@ -35,9 +35,13 @@ require_once(__DIR__ . '/../../config.php');
 error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', '0');
 
+// Use a plain ampersand in redirect URLs, as Moodle's HTML-escaped separator breaks OAuth error redirects.
+ini_set('arg_separator.output', '&');
+
 $clientid = required_param('client_id', PARAM_TEXT);
 $responsetype = required_param('response_type', PARAM_TEXT);
 $scope = optional_param('scope', false, PARAM_TEXT);
+$scope = local_placecom_mcp\utils::restrict_scope_to_client($clientid, $scope);
 $state = optional_param('state', false, PARAM_TEXT);
 $codechallenge = optional_param('code_challenge', false, PARAM_TEXT);
 $codechallengemethod = optional_param('code_challenge_method', false, PARAM_ALPHANUMEXT);
@@ -77,6 +81,9 @@ if (isloggedin() && !isguestuser()) {
     // rather than indexing $_POST directly, per Moodle's input-handling
     // guidelines — fixed during the local_oauth2 -> local_placecom_mcp port.
     $queryparams = $_GET;
+    if (isset($queryparams['scope'])) {
+        $queryparams['scope'] = $scope;
+    }
     $postcodechallenge = optional_param('code_challenge', false, PARAM_TEXT);
     $postcodechallengemethod = optional_param('code_challenge_method', false, PARAM_ALPHANUMEXT);
     if ($postcodechallenge) {
@@ -121,6 +128,9 @@ if (isloggedin() && !isguestuser()) {
 
     // Pass PKCE parameters to the consent form as hidden fields.
     $formcustomdata = [];
+    if (!empty($scope)) {
+        $formcustomdata['scope'] = $scope;
+    }
     if ($codechallenge) {
         $formcustomdata['code_challenge'] = $codechallenge;
     }

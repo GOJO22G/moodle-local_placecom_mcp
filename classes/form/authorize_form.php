@@ -50,6 +50,9 @@ class authorize_form extends moodleform {
         $authquestiontext = get_string('oauth_auth_question', 'local_placecom_mcp', $clientid);
         $mform->addElement('html', $authquestiontext);
         $scope = optional_param('scope', '', PARAM_TEXT);
+        if (!empty($this->_customdata['scope'])) {
+            $scope = $this->_customdata['scope'];
+        }
         $scopetext = get_string('oauth_scope_list', 'local_placecom_mcp');
         if (!empty($scope)) {
             $scopes = explode(' ', $scope);

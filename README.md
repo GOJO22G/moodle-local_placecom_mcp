@@ -89,6 +89,10 @@ users holding the `local/placecom_mcp:manage_oauth_clients` capability (Managers
 2. Go to *Manage OAuth clients* and register a client for the assistant. Enter the
    redirect URI that the assistant gives you, and choose the scopes it may request.
    Grant `moodle_mcp_write` only if you want it to be able to post to forums.
+   The client ID, redirect URI and scope are required. The redirect URI must be an `https://` address
+   (or `http://localhost` for local testing), and the scope must include `moodle_mcp_read`. `moodle_mcp_write`
+   is optional and is only valid together with read. "Require PKCE" is ticked by default. The `address` and
+   `phone` scopes are not needed.
 3. In the assistant, add a custom MCP connector pointing at your MCP endpoint, and
    supply the client ID (and secret, if the client has one).
 4. When the user first connects, they sign in to Moodle and approve the access request.
@@ -119,6 +123,12 @@ RewriteEngine On
 RewriteRule ^/\.well-known/(oauth-authorization-server|openid-configuration)/moodle/?$ /moodle/local/placecom_mcp/openid_configuration.php [PT,L]
 RewriteRule ^/moodle/\.well-known/(oauth-authorization-server|openid-configuration)/?$ /moodle/local/placecom_mcp/openid_configuration.php [PT,L]
 ```
+
+### What a client is granted
+
+A client is granted the scopes it requests that are also registered for it. Assistants such as Claude request every scope the server advertises, so a client registered without `moodle_mcp_write` still connects, but its tokens carry no write permission and the two write tools are hidden and refused. A request that contains none of the client's registered scopes is rejected.
+
+Reducing a client's scopes only affects new connections. Tokens that were already issued keep the scopes they were granted until they are revoked, so after removing a scope from a client, revoke that client's existing tokens under *Manage active tokens*. Users then sign in again and receive the reduced scope.
 
 ## What the assistant can access
 

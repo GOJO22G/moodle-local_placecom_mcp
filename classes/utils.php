@@ -139,6 +139,45 @@ class utils {
     }
 
     /**
+     * Restrict a requested scope string to the scopes the client is registered for.
+     *
+     * Assistants such as Claude request every scope a server advertises. The bundled OAuth library rejects the
+     * whole request when any one scope is not registered for the client. RFC 6749 section 3.3 lets a server
+     * grant a narrower scope instead, so this keeps only the requested scopes the client is allowed. The
+     * client then connects and simply does not receive the permissions it is not registered for.
+     *
+     * The value is returned unchanged when nothing was requested, when the client has no registered scopes,
+     * when nothing would be dropped, or when no requested scope would be left, so requests that already work
+     * behave as before and a request for unknown scopes still fails.
+     *
+     * @param string $clientid The client id from the request.
+     * @param string|false $requested The space-separated scope string from the request, or false.
+     * @return string|false The restricted scope string, or the original value when it should not change.
+     */
+    public static function restrict_scope_to_client(string $clientid, $requested) {
+        global $DB;
+
+        if (empty($requested)) {
+            return $requested;
+        }
+
+        $registered = $DB->get_field('local_placecom_mcp_client', 'scope', ['client_id' => $clientid]);
+        if (empty($registered)) {
+            return $requested;
+        }
+
+        $allowed = preg_split('/\s+/', trim((string) $registered), -1, PREG_SPLIT_NO_EMPTY);
+        $asked = preg_split('/\s+/', trim((string) $requested), -1, PREG_SPLIT_NO_EMPTY);
+        $kept = array_values(array_intersect($asked, $allowed));
+
+        if (empty($kept) || count($kept) === count($asked)) {
+            return $requested;
+        }
+
+        return implode(' ', $kept);
+    }
+
+    /**
      * Get the public issuer URL for this provider.
      *
      * @return string

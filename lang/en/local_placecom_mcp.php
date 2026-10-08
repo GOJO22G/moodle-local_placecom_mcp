@@ -64,12 +64,13 @@ $string['oauth_redirect_uri'] = 'Redirect URI';
 $string['oauth_redirect_uri_help'] = 'Redirect URI for the OAuth client.';
 $string['oauth_redirect_uri_help_local_copilot'] = '<br/>
 For Microsoft 365 Copilot integration, use: <b>https://teams.microsoft.com/api/platform/v1.0/oAuthRedirect</b>';
+$string['oauth_redirect_uri_invalid'] = 'The redirect URI must be an https:// address, or http://localhost for local testing.';
 $string['oauth_require_pkce'] = 'Require PKCE';
 $string['oauth_require_pkce_help'] = 'Require PKCE (Proof Key for Code Exchange) for this client. PKCE provides additional security against authorization code interception attacks. Recommended for public clients such as mobile apps and single-page applications.';
 $string['oauth_scope'] = 'Scope';
 $string['oauth_scope_address'] = 'Address information';
 $string['oauth_scope_email'] = 'Email address';
-$string['oauth_scope_help'] = 'Scope for the OAuth client.';
+$string['oauth_scope_help'] = 'Scopes the client may be granted, separated by spaces. Required: the scope must include moodle_mcp_read. Recommended: openid profile email offline_access moodle_mcp_read. Add moodle_mcp_write only if the assistant needs to post to forums, and only together with moodle_mcp_read. The address and phone scopes are not needed.';
 $string['oauth_scope_help_local_copilot'] = '<br/>
 Separate multiple scopes with a space.</br>
 For Microsoft 365 Copilot integration, this should be:
@@ -79,6 +80,9 @@ For Microsoft 365 Copilot integration, this should be:
 </ul>';
 $string['oauth_scope_list'] = 'The application is to access the following data:';
 $string['oauth_scope_login'] = 'Login';
+$string['oauth_scope_moodle_mcp_read'] = 'Read your Moodle courses, groups, calendar and notifications';
+$string['oauth_scope_moodle_mcp_write'] = 'Post to forums in your Moodle courses on your behalf';
+$string['oauth_scope_must_include_read'] = 'The scope must include moodle_mcp_read. moodle_mcp_write can only be added together with moodle_mcp_read.';
 $string['oauth_scope_offline_access'] = 'Offline access (issue refresh tokens for OpenID Connect clients)';
 $string['oauth_scope_openid'] = 'OpenID authentication';
 $string['oauth_scope_phone'] = 'Phone number';
