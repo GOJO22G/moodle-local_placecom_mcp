@@ -16,8 +16,6 @@
 
 namespace local_placecom_mcp;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Tests that requested scopes are restricted to the scopes registered for the client.
  *

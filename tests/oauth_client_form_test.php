@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-namespace local_placecom_mcp\form;
+namespace local_placecom_mcp;
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -48,7 +48,7 @@ final class oauth_client_form_test extends \advanced_testcase {
             'scope' => 'openid moodle_mcp_read',
         ];
 
-        $form = new oauth_client_form();
+        $form = new \local_placecom_mcp\form\oauth_client_form();
         return $form->validation($data, []);
     }
 
