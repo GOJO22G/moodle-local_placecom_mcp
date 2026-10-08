@@ -35,8 +35,11 @@ namespace local_placecom_mcp\local;
  * boundary instead, enforced in code regardless of what the service table
  * says.
  *
- * This is a curated subset (34 read, 2 write) of an earlier, broader
+ * This is a curated subset (22 read, 2 write) of an earlier, broader
  * 54-function list, narrowed down to core day-to-day functionality.
+ * Site info is excluded because it exposes userprivateaccesskey, and the
+ * forum discussion/post read functions are excluded because they expose
+ * userid and userpictureurl.
  * Every name below was individually verified against this Moodle
  * installation's actual source (db/services.php in the owning module),
  * not assumed from documentation alone.
@@ -64,55 +67,41 @@ class approved_functions {
      */
     public const LIST = [
         // Core (lib/db/services.php).
-        'core_webservice_get_site_info',
         'core_course_get_courses_by_field',
-        'core_course_get_categories',
         'core_course_search_courses',
-        'core_course_get_contents',
+        'core_course_get_categories',
         'core_course_get_course_module',
-        'core_enrol_get_users_courses',
         'core_course_get_enrolled_courses_by_timeline_classification',
         'core_course_get_recent_courses',
+        'core_enrol_get_users_courses',
         'core_group_get_course_groups',
         'core_group_get_course_user_groups',
         'core_group_get_group_members',
         'core_calendar_get_action_events_by_course',
         'core_calendar_get_action_events_by_timesort',
         'core_message_get_unread_notification_count',
-        'core_completion_get_activities_completion_status',
         'core_completion_get_course_completion_status',
         'core_badges_get_user_badges',
-        'core_files_get_files',
 
         // Assignment (mod/assign).
         'mod_assign_get_assignments',
-        'mod_assign_get_submission_status',
 
         // Quiz (mod/quiz).
         'mod_quiz_get_quizzes_by_courses',
-        'mod_quiz_get_user_best_grade',
-        'mod_quiz_get_attempt_review',
-        'mod_quiz_get_attempt_summary',
-
-        // Forum (mod/forum).
-        'mod_forum_get_forums_by_courses',
-        'mod_forum_get_forum_discussions',
-        'mod_forum_get_discussion_posts',
-        'mod_forum_add_discussion', // Write function.
-        'mod_forum_add_discussion_post', // Write function.
 
         // Lesson (mod/lesson).
         'mod_lesson_get_lessons_by_courses',
-        'mod_lesson_get_user_attempt',
-
-        // Glossary (mod/glossary).
-        'mod_glossary_get_entries_by_search',
 
         // Page (mod/page).
         'mod_page_get_pages_by_courses',
 
         // URL (mod/url).
         'mod_url_get_urls_by_courses',
+
+        // Forum (mod/forum).
+        'mod_forum_get_forums_by_courses',
+        'mod_forum_add_discussion', // Write function.
+        'mod_forum_add_discussion_post', // Write function.
 
         // Notifications (message/output/popup).
         'message_popup_get_unread_popup_notification_count',

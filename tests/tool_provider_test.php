@@ -313,7 +313,7 @@ final class tool_provider_test extends externallib_advanced_testcase {
         // Add a function to the service (using an existing core function).
         $function = new stdClass();
         $function->externalserviceid = $serviceid;
-        $function->functionname = 'core_webservice_get_site_info';
+        $function->functionname = 'core_course_get_categories';
         $DB->insert_record('external_services_functions', $function);
 
         // Create a token for the service.
@@ -339,7 +339,7 @@ final class tool_provider_test extends externallib_advanced_testcase {
         $this->assertArrayHasKey('inputSchema', $tool);
         $this->assertArrayHasKey('outputSchema', $tool);
 
-        $this->assertEquals('core_webservice_get_site_info', $tool['name']);
+        $this->assertEquals('core_course_get_categories', $tool['name']);
         $this->assertIsArray($tool['inputSchema']);
         $this->assertIsArray($tool['outputSchema']);
     }
