@@ -19,6 +19,8 @@ namespace local_placecom_mcp;
 use local_placecom_mcp\local\approved_functions;
 use local_placecom_mcp\local\tool_provider;
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once($CFG->dirroot . '/webservice/tests/helpers.php');
 
