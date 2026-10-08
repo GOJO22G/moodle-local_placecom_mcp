@@ -16,7 +16,7 @@ always apply. The assistant never sees more than that user could see in Moodle.
 ## Features
 
 - MCP server endpoint (JSON-RPC over HTTP) with `tools/list` and `tools/call`.
-- A fixed allowlist of **36 web service functions** (34 read, 2 write). Anything not on
+- A fixed allowlist of **24 web service functions** (22 read, 2 write). Anything not on
   the list is refused, even if called directly by name.
 - OAuth 2.0 authorization code flow with refresh tokens, PKCE (`S256`, which can be
   required per client), and signed OpenID Connect ID tokens (RS256).
@@ -66,7 +66,7 @@ On installation the plugin:
   functions;
 - grants the `local/placecom_mcp:use` capability to the *Authenticated user* role.
 
-No further setup is needed for the MCP server to start answering requests.
+The plugin is not ready to use yet: complete the setup steps under *Connecting an AI assistant* below (enable web services, then register an OAuth client).
 
 ## Configuration
 
@@ -80,17 +80,18 @@ Everything is under *Site administration → Server → Placecom MCP Connector*.
 | Refresh token lifetime | How long a refresh token stays valid. Default: 1 week. |
 | Issuer | Optional. Overrides the issuer URL, for example when Moodle runs behind a reverse proxy. Defaults to the site URL. |
 
-The same section contains **Manage OAuth clients** and **Manage tokens**, available to
+The same section contains **Manage OAuth clients** and **Manage active tokens**, available to
 users holding the `local/placecom_mcp:manage_oauth_clients` capability (Managers by default).
 
 ## Connecting an AI assistant
 
-1. Go to *Manage OAuth clients* and register a client for the assistant. Enter the
+1. Enable web services: *Site administration → Advanced features → Enable web services*. This is off on a new Moodle site, and the MCP endpoint refuses every request while it is off.
+2. Go to *Manage OAuth clients* and register a client for the assistant. Enter the
    redirect URI that the assistant gives you, and choose the scopes it may request.
    Grant `moodle_mcp_write` only if you want it to be able to post to forums.
-2. In the assistant, add a custom MCP connector pointing at your MCP endpoint, and
+3. In the assistant, add a custom MCP connector pointing at your MCP endpoint, and
    supply the client ID (and secret, if the client has one).
-3. When the user first connects, they sign in to Moodle and approve the access request.
+4. When the user first connects, they sign in to Moodle and approve the access request.
 
 ### Endpoints
 
@@ -124,13 +125,13 @@ RewriteRule ^/moodle/\.well-known/(oauth-authorization-server|openid-configurati
 The allowlist lives in `classes/local/approved_functions.php` and is the single source
 of truth. It covers, in outline:
 
-- site information, courses, course categories and course contents;
+- courses, course categories and course module details;
 - the user's enrolled and recent courses, groups, and group members;
 - calendar action events and notification counts;
-- activity and course completion status, and the user's badges;
-- files, pages and URL resources;
-- assignments (including submission status), quizzes (including attempts and grades),
-  lessons, glossary search, and forums (reading discussions and posts).
+- course completion status and the user's badges;
+- pages and URL resources;
+- assignments, quizzes and lessons (course-level details only),
+  and the forums in a course (not their discussions or posts).
 
 Only two functions can change data: `mod_forum_add_discussion` and
 `mod_forum_add_discussion_post`. They require the `moodle_mcp_write` scope.
@@ -141,13 +142,14 @@ increase the plugin version so Moodle re-syncs the external service on upgrade.
 
 ## Security
 
+- Keep Moodle debugging off in production (*Site administration → Development → Debugging* set to *None*, with *Display debug messages* off). Debug output can be printed into MCP responses, corrupting them and exposing internal details.
 - Each call is executed as the authenticated user, with Moodle's normal capability
   checks applied on top of the allowlist.
 - Write access is enforced separately from read access, using the scope recorded when
   the token was issued.
 - OAuth client secrets are stored hashed.
 - Administrators can switch the MCP endpoint off at any time and can revoke tokens from
-  the *Manage tokens* page. Revoking a token takes effect immediately and also removes all of that user's
+  the *Manage active tokens* page. Revoking a token takes effect immediately and also removes all of that user's
   other MCP tokens, so they must sign in again.
 
 ## Privacy

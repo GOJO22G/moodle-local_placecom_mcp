@@ -60,6 +60,15 @@ class tool_provider {
 
         $tools = [];
 
+        // Write tools are only offered to tokens whose granted OAuth scope includes
+        // moodle_mcp_write. Fails closed like server::enforce_scope(): no scope
+        // record means the write scope cannot be confirmed, so no write tools.
+        $canwrite = false;
+        $scoperow = $DB->get_record('local_placecom_mcp_token_scope', ['token' => $token]);
+        if ($scoperow) {
+            $canwrite = in_array('moodle_mcp_write', explode(' ', (string) $scoperow->scope), true);
+        }
+
         // Query functions available for this service.
         $functions = $DB->get_records(
             'external_services_functions',
@@ -92,6 +101,11 @@ class tool_provider {
             // metadata only distinguishes read/write, not which writes are
             // destructive - guessing that risks mislabeling something as safe.
             $functiontype = $info->type ?? 'read';
+
+            // Hide write tools from tokens without the write scope.
+            if ($functiontype === 'write' && !$canwrite) {
+                continue;
+            }
 
             $inputschema = self::build_schema($info->parameters_desc);
             $outputschema = self::build_schema($info->returns_desc);
