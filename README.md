@@ -130,6 +130,28 @@ A client is granted the scopes it requests that are also registered for it. Assi
 
 Reducing a client's scopes only affects new connections. Tokens that were already issued keep the scopes they were granted until they are revoked, so after removing a scope from a client, revoke that client's existing tokens under *Manage active tokens*. Users then sign in again and receive the reduced scope.
 
+### Testing without an assistant
+
+To check the MCP endpoint without connecting an assistant, create a token for *Placecom MCP Service* under *Site administration → Server → Web services → Manage tokens*, then send a `tools/list` request to the endpoint. Replace `YOUR_TOKEN` and the address with your own.
+
+Linux or macOS (curl):
+
+```
+curl -X POST "https://your-site/local/placecom_mcp/server.php" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+Windows PowerShell (here `curl` is an alias for a different command, so use this form):
+
+```
+$body = '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+Invoke-RestMethod -Uri "https://your-site/local/placecom_mcp/server.php" -Method Post -ContentType "application/json" -Headers @{Authorization = "Bearer YOUR_TOKEN"; Accept = "application/json"} -Body $body
+```
+
+A token created this way has no OAuth scope record, so the list shows only the 23 read tools.
+
 ## What the assistant can access
 
 The allowlist lives in `classes/local/approved_functions.php` and is the single source

@@ -128,7 +128,7 @@ $string['privacy:metadata:local_placecom_mcp_user_auth_scope:scope'] = 'The scop
 $string['privacy:metadata:local_placecom_mcp_user_auth_scope:user_id'] = 'The ID of the user who granted the scope.';
 $string['privacy:metadata:mcp_assistant'] = 'When a user authorises an AI assistant (an MCP client) to access Moodle, data about that user is sent to the assistant. The assistant provider handles that data under its own terms and privacy policy.';
 $string['privacy:metadata:mcp_assistant:identity'] = 'Identity details released through OpenID Connect, depending on the scopes the user grants: user ID, username, name, email address, picture, address and phone number.';
-$string['privacy:metadata:mcp_assistant:moodledata'] = 'The results of the approved web service functions that the assistant calls for the user, such as courses, activities, completion, badges, files, grades, calendar events and forum content that the user can access in Moodle.';
+$string['privacy:metadata:mcp_assistant:moodledata'] = 'The results of the approved web service functions that the assistant calls for the user: the courses the user is enrolled in, course categories and module details, groups and group members, calendar events, notification counts, completion status, badges, assignments, quizzes, lessons, pages, URL resources and forum lists that the user can access in Moodle, and the username, name and user ID of the signed-in user. If the administrator allows the write scope, the assistant can also post forum discussions and replies for the user.';
 
 
 $string['revoke'] = 'Revoke';
