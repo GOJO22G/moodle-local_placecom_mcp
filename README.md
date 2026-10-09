@@ -30,7 +30,8 @@ always apply. The assistant never sees more than that user could see in Moodle.
 
 ## Requirements
 
-- Moodle 4.5 or later.
+- Moodle 4.5 or later. The plugin is tested automatically on Moodle 4.5 and 5.2 with MariaDB and PostgreSQL,
+  has also been run on Moodle 5.0 with MySQL, and has been used with Claude and Gemini Enterprise.
 - Web services enabled: *Site administration → Advanced features → Enable web services*. This is off on a
   new Moodle site. When it is off, the MCP endpoint refuses every request.
 - The PHP OpenSSL extension (used once at install time to generate the signing key pair).
@@ -38,6 +39,8 @@ always apply. The assistant never sees more than that user could see in Moodle.
   key generation fails. If that happens, set `$CFG->opensslcnf` in `config.php` to the full path of
   your `openssl.cnf` (the same setting Moodle core uses), then run
   `php local/placecom_mcp/cli/generate_keys.php`.
+  If key generation fails the install still completes, and the failure is only reported as a debugging
+  notice, but sign-in cannot issue ID tokens until a key exists.
 - To connect a hosted assistant such as Claude, your Moodle site must be reachable
   from the internet over HTTPS. Hosted assistants cannot reach `localhost`.
 
@@ -75,10 +78,10 @@ Everything is under *Site administration → Server → Placecom MCP Connector*.
 | Setting | Description |
 | --- | --- |
 | Enable MCP server | Master switch for the MCP endpoint. On by default. When off, the endpoint refuses every request. |
-| Web service ID to bridge | Optional. Leave blank to use *Placecom MCP Service*. Set the numeric ID of another external service if you want tokens attached to that one instead. |
+| Web service ID to bridge (optional override) | Optional. Leave blank to use *Placecom MCP Service*. Set the numeric ID of another external service if you want tokens attached to that one instead. |
 | Access token lifetime | How long an access token stays valid. Default: 1 hour. |
 | Refresh token lifetime | How long a refresh token stays valid. Default: 1 week. |
-| Issuer | Optional. Overrides the issuer URL, for example when Moodle runs behind a reverse proxy. Defaults to the site URL. |
+| OIDC issuer | Optional. Overrides the issuer URL, for example when Moodle runs behind a reverse proxy. Defaults to the site URL. |
 
 The same section contains **Manage OAuth clients** and **Manage active tokens**, available to
 users holding the `local/placecom_mcp:manage_oauth_clients` capability (Managers by default).
@@ -88,6 +91,8 @@ users holding the `local/placecom_mcp:manage_oauth_clients` capability (Managers
 1. Enable web services: *Site administration → Advanced features → Enable web services*. This is off on a new Moodle site, and the MCP endpoint refuses every request while it is off.
 2. Go to *Manage OAuth clients* and register a client for the assistant. Enter the
    redirect URI that the assistant gives you, and choose the scopes it may request.
+   For example, Claude uses `https://claude.ai/api/mcp/auth_callback` and Gemini Enterprise uses
+   `https://vertexaisearch.cloud.google.com/oauth-redirect` (check your assistant's documentation, as these can change).
    Grant `moodle_mcp_write` only if you want it to be able to post to forums.
    The client ID, redirect URI and scope are required. The redirect URI must be an `https://` address
    (or `http://localhost` for local testing), and the scope must include `moodle_mcp_read`. `moodle_mcp_write`
@@ -96,6 +101,21 @@ users holding the `local/placecom_mcp:manage_oauth_clients` capability (Managers
 3. In the assistant, add a custom MCP connector pointing at your MCP endpoint, and
    supply the client ID (and secret, if the client has one).
 4. When the user first connects, they sign in to Moodle and approve the access request.
+
+### Scopes
+
+Scopes the plugin offers, and what each one allows:
+
+| Scope | What it allows |
+| --- | --- |
+| `openid` | OpenID Connect sign-in. |
+| `profile` | Name and profile picture details. |
+| `email` | Email address. |
+| `address` | Address details. Not needed. |
+| `phone` | Phone number. Not needed. |
+| `offline_access` | Refresh tokens, so the assistant can stay connected without the user signing in again. |
+| `moodle_mcp_read` | Reading the user's Moodle data through the allowlisted functions (courses, groups, calendar, notifications and similar). Required. |
+| `moodle_mcp_write` | Posting forum discussions and replies for the user. Optional. |
 
 ### Endpoints
 
@@ -108,6 +128,7 @@ All URLs are relative to your Moodle site URL.
 | OpenID configuration (discovery) | `/local/placecom_mcp/openid_configuration.php` |
 | Authorization | `/local/placecom_mcp/login.php` |
 | Token | `/local/placecom_mcp/token.php` |
+| Refresh token (same behaviour as the token endpoint) | `/local/placecom_mcp/refresh_token.php` |
 | User info | `/local/placecom_mcp/userinfo.php` |
 | JWKS | `/local/placecom_mcp/jwks.php` |
 
@@ -195,7 +216,8 @@ The plugin stores the following in the Moodle database:
 - authorization codes, access tokens and refresh tokens, each linked to the Moodle user
   who approved the access;
 - the scopes each user has granted to each client;
-- records linking an issued web service token to the scope it was granted.
+- records linking an issued web service token to the scope it was granted;
+- a Moodle web service token for each user who authorises an assistant (stored by Moodle's web services subsystem).
 
 The plugin implements the Moodle Privacy API. It declares the data above, including the data
 released to a connected assistant, and supports exporting and deleting a user's data through
@@ -228,10 +250,12 @@ It is declared in `thirdpartylibs.xml`.
 Report bugs and request features at
 <https://github.com/GOJO22G/moodle-local_placecom_mcp/issues>.
 
+When reporting a problem, please include your Moodle version and database, the assistant you connected,
+and any related lines from the web server error log. Never post tokens, client secrets or private keys.
+
 ## Credits and licence
 
-Developed by AlmaBay Networks Pvt. Ltd. (Placecom). This plugin brings together three
-earlier plugins into one, and builds on the work of others:
+Developed by AlmaBay Networks Pvt. Ltd. (Placecom). It builds on the work of others:
 
 - The OAuth 2.0 / OpenID Connect server is based on
   [`local_oauth2`](https://moodle.org/plugins/local_oauth2) by Enovation Solutions,
