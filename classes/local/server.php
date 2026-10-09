@@ -453,6 +453,26 @@ class server extends webservice_base_server {
     }
 
     /**
+     * Fields of core_webservice_get_site_info that may be returned to an assistant.
+     *
+     * The full reply includes credentials such as userprivateaccesskey and details of the site and service
+     * that an assistant does not need, so anything not named here is removed.
+     *
+     * @var string[]
+     */
+    public const SITE_INFO_FIELDS = ['userid', 'username', 'firstname', 'lastname', 'fullname', 'sitename'];
+
+    /**
+     * Reduce a core_webservice_get_site_info reply to the fields in SITE_INFO_FIELDS.
+     *
+     * @param mixed $values The validated reply.
+     * @return array The reply with only the allowed fields.
+     */
+    public static function restrict_site_info($values): array {
+        return array_intersect_key((array) $values, array_flip(self::SITE_INFO_FIELDS));
+    }
+
+    /**
      * Send a successful response for standard function calls.
      *
      * This method validates return values using external_api and wraps
@@ -481,6 +501,12 @@ class server extends webservice_base_server {
             $response = $this->generate_tool_error($exception);
             echo $this->safe_json_encode($response);
             return;
+        }
+
+        // The site info reply holds credentials and site details, so only an allowlist of fields is returned.
+        $functionname = $this->function->name ?? $this->functionname ?? '';
+        if ($functionname === 'core_webservice_get_site_info') {
+            $validatedvalues = self::restrict_site_info($validatedvalues);
         }
 
         // Fix arrays to be objects for tools/call format.

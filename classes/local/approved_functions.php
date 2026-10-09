@@ -35,9 +35,10 @@ namespace local_placecom_mcp\local;
  * boundary instead, enforced in code regardless of what the service table
  * says.
  *
- * This is a curated subset (22 read, 2 write) of an earlier, broader
+ * This is a curated subset (23 read, 2 write) of an earlier, broader
  * 54-function list, narrowed down to core day-to-day functionality.
- * Site info is excluded because it exposes userprivateaccesskey, and the
+ * Site info is included, but its reply is cut down to a short list of fields by
+ * server::restrict_site_info(), because the full reply exposes userprivateaccesskey. The
  * forum discussion/post read functions are excluded because they expose
  * userid and userpictureurl.
  * Every name below was individually verified against this Moodle
@@ -67,6 +68,7 @@ class approved_functions {
      */
     public const LIST = [
         // Core (lib/db/services.php).
+        'core_webservice_get_site_info', // Reply filtered by server::restrict_site_info().
         'core_course_get_courses_by_field',
         'core_course_search_courses',
         'core_course_get_categories',

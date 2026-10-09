@@ -16,7 +16,7 @@ always apply. The assistant never sees more than that user could see in Moodle.
 ## Features
 
 - MCP server endpoint (JSON-RPC over HTTP) with `tools/list` and `tools/call`.
-- A fixed allowlist of **24 web service functions** (22 read, 2 write). Anything not on
+- A fixed allowlist of **25 web service functions** (23 read, 2 write). Anything not on
   the list is refused, even if called directly by name.
 - OAuth 2.0 authorization code flow with refresh tokens, PKCE (`S256`, which can be
   required per client), and signed OpenID Connect ID tokens (RS256).
@@ -135,6 +135,9 @@ Reducing a client's scopes only affects new connections. Tokens that were alread
 The allowlist lives in `classes/local/approved_functions.php` and is the single source
 of truth. It covers, in outline:
 
+- who the signed-in user is: user ID, username, first and last name, full name and site name
+  (`core_webservice_get_site_info`, with its reply cut down to those fields; the private
+  access key and every other field are never returned);
 - courses, course categories and course module details;
 - the user's enrolled and recent courses, groups, and group members;
 - calendar action events and notification counts;

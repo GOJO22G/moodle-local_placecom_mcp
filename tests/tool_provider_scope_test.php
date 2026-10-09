@@ -101,7 +101,7 @@ final class tool_provider_scope_test extends \externallib_advanced_testcase {
     }
 
     /**
-     * A token whose scope lacks moodle_mcp_write sees the 22 read tools only.
+     * A token whose scope lacks moodle_mcp_write sees the 23 read tools only.
      */
     public function test_read_only_scope_hides_write_tools(): void {
         $this->resetAfterTest(true);
@@ -110,14 +110,14 @@ final class tool_provider_scope_test extends \externallib_advanced_testcase {
         $token = $this->create_token($this->create_service(), 'openid profile email');
         $names = array_column(tool_provider::get_tools($token), 'name');
 
-        $this->assertCount(22, $names);
+        $this->assertCount(23, $names);
         foreach (self::WRITE_FUNCTIONS as $writefunction) {
             $this->assertNotContains($writefunction, $names);
         }
     }
 
     /**
-     * A token with moodle_mcp_write sees all 24 tools, including both write tools.
+     * A token with moodle_mcp_write sees all 25 tools, including both write tools.
      */
     public function test_write_scope_shows_all_tools(): void {
         $this->resetAfterTest(true);
@@ -126,7 +126,7 @@ final class tool_provider_scope_test extends \externallib_advanced_testcase {
         $token = $this->create_token($this->create_service(), 'openid profile moodle_mcp_write');
         $names = array_column(tool_provider::get_tools($token), 'name');
 
-        $this->assertCount(24, $names);
+        $this->assertCount(25, $names);
         foreach (self::WRITE_FUNCTIONS as $writefunction) {
             $this->assertContains($writefunction, $names);
         }
@@ -142,7 +142,7 @@ final class tool_provider_scope_test extends \externallib_advanced_testcase {
         $token = $this->create_token($this->create_service(), null);
         $names = array_column(tool_provider::get_tools($token), 'name');
 
-        $this->assertCount(22, $names);
+        $this->assertCount(23, $names);
         foreach (self::WRITE_FUNCTIONS as $writefunction) {
             $this->assertNotContains($writefunction, $names);
         }
