@@ -70,7 +70,7 @@ $string['oauth_require_pkce_help'] = 'Require PKCE (Proof Key for Code Exchange)
 $string['oauth_scope'] = 'Scope';
 $string['oauth_scope_address'] = 'Address information';
 $string['oauth_scope_email'] = 'Email address';
-$string['oauth_scope_help'] = 'Scopes the client may be granted, separated by spaces. Required: the scope must include moodle_mcp_read. Recommended: openid profile email offline_access moodle_mcp_read. Add moodle_mcp_write only if the assistant needs to post to forums, and only together with moodle_mcp_read. The address and phone scopes are not needed.';
+$string['oauth_scope_help'] = 'Allows the client to access Moodle data using <code>moodle_mcp_read</code>. Recommended: Add <code>openid profile email offline_access</code> for login and continued access. Add <code>moodle_mcp_write</code> only if the assistant needs to post to forums.';
 $string['oauth_scope_help_local_copilot'] = '<br/>
 Separate multiple scopes with a space.</br>
 For Microsoft 365 Copilot integration, this should be:
