@@ -143,10 +143,14 @@ switch ($action) {
             $viewtable = false;
             echo $OUTPUT->confirm(
                 get_string('delete_oauth_client_confirm', 'local_placecom_mcp'),
-                new moodle_url('/local/placecom_mcp/manage_oauth_clients.php', ['action' => 'delete', 'id' => $id, 'confirm' => 1]),
+                new moodle_url(
+                    '/local/placecom_mcp/manage_oauth_clients.php',
+                    ['action' => 'delete', 'id' => $id, 'confirm' => 1, 'sesskey' => sesskey()]
+                ),
                 new moodle_url('/local/placecom_mcp/manage_oauth_clients.php')
             );
         } else {
+            require_sesskey();
             if (!$DB->delete_records('local_placecom_mcp_client', ['id' => $id])) {
                 throw new moodle_exception('error_deleting_oauth_client', 'local_placecom_mcp');
             }
