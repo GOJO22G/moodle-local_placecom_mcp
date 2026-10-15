@@ -207,6 +207,10 @@ increase the plugin version so Moodle re-syncs the external service on upgrade.
 - Administrators can switch the MCP endpoint off at any time and can revoke tokens from
   the *Manage active tokens* page. Revoking a token takes effect immediately and also removes all of that user's
   other MCP tokens, so they must sign in again.
+- Deleting an OAuth client on the *Manage OAuth clients* page revokes everything issued to it:
+  its access, refresh and authorization tokens, its stored user consents and the web service
+  tokens bridged for the users it served. Bridged tokens are revoked per user, so those users'
+  tokens for other connected assistants are removed too, and they must sign in again.
 
 ## Privacy
 

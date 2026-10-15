@@ -132,6 +132,40 @@ class observers {
     }
 
     /**
+     * Deletes every bridged web service token a user holds for this plugin's service.
+     *
+     * Revokes by user + service rather than by token string, because access tokens are
+     * stored as SHA-256 hashes while external_tokens and local_placecom_mcp_token_scope
+     * hold the plaintext bridged token. Deliberately broader than a single session,
+     * failing closed in the same way as enforce_scope().
+     *
+     * @param int $userid Moodle user id.
+     * @return void
+     */
+    public static function revoke_bridged_tokens_for_user(int $userid): void {
+        global $DB;
+
+        $externalserviceid = self::resolve_service_id();
+        if (empty($externalserviceid)) {
+            return;
+        }
+
+        $bridgedtokens = $DB->get_records('external_tokens', [
+            'userid' => $userid,
+            'externalserviceid' => $externalserviceid,
+        ]);
+
+        foreach ($bridgedtokens as $bridgedtoken) {
+            $DB->delete_records('local_placecom_mcp_token_scope', ['token' => $bridgedtoken->token]);
+        }
+
+        $DB->delete_records('external_tokens', [
+            'userid' => $userid,
+            'externalserviceid' => $externalserviceid,
+        ]);
+    }
+
+    /**
      * Fires when an admin manually revokes an OAuth access token via
      * local_placecom_mcp's manage_tokens.php page. Immediately deletes the
      * matching bridged token(s) and their scope rows, rather than leaving
@@ -153,32 +187,15 @@ class observers {
      * @return void
      */
     public static function handle_access_token_revoked($event) {
-        global $DB;
 
-        $userid = $event->relateduserid;
+             $userid = $event->relateduserid;
 
         if (empty($userid)) {
             debugging('local_placecom_mcp: access_token_revoked event received with no relateduserid, skipping', DEBUG_DEVELOPER);
             return;
         }
 
-        $externalserviceid = self::resolve_service_id();
-        if (empty($externalserviceid)) {
-            return;
-        }
-
-        $bridgedtokens = $DB->get_records('external_tokens', [
-            'userid' => $userid,
-            'externalserviceid' => $externalserviceid,
-        ]);
-
-        foreach ($bridgedtokens as $bridgedtoken) {
-            $DB->delete_records('local_placecom_mcp_token_scope', ['token' => $bridgedtoken->token]);
-        }
-
-        $DB->delete_records('external_tokens', [
-            'userid' => $userid,
-            'externalserviceid' => $externalserviceid,
-        ]);
+        self::revoke_bridged_tokens_for_user((int) $userid);
     }
 }
+            

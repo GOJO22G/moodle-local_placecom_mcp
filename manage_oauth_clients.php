@@ -70,7 +70,7 @@ switch ($action) {
                 $clientrecord->client_id = $fromform->client_id;
             }
             $clientrecord->redirect_uri = $fromform->redirect_uri;
-            $clientrecord->scope = $fromform->scope;
+            $clientrecord->scope = utils::normalise_scope($fromform->scope);
             $clientrecord->require_pkce = $fromform->require_pkce;
 
             if (!isset($clientrecordtoedit)) {
@@ -149,17 +149,13 @@ switch ($action) {
                 ),
                 new moodle_url('/local/placecom_mcp/manage_oauth_clients.php')
             );
-        } else {
+                        } else {
             require_sesskey();
-            if (!$DB->delete_records('local_placecom_mcp_client', ['id' => $id])) {
-                throw new moodle_exception('error_deleting_oauth_client', 'local_placecom_mcp');
-            }
 
-            if (!empty($rawsecret)) {
-                echo $OUTPUT->notification(
-                    get_string('oauth_client_secret_shown_once', 'local_placecom_mcp', $rawsecret),
-                    'notifywarning'
-                );
+            if (!utils::delete_client($id)) {
+                echo $OUTPUT->notification(get_string('oauth_client_not_exists', 'local_placecom_mcp'));
+                $viewtable = true;
+                break;
             }
 
             echo $OUTPUT->notification(get_string('oauth_client_changes_saved', 'local_placecom_mcp'), 'notifysuccess');

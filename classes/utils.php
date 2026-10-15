@@ -492,4 +492,75 @@ class utils {
 
         return false;
     }
+    /**
+     * Deletes an OAuth client together with every credential issued to it.
+     *
+     * Collects the affected users first, revokes their bridged web service tokens,
+     * then removes the client's rows from every table keyed by client_id and
+     * finally the client itself. Runs in one transaction so a failure leaves
+     * nothing half-deleted.
+     *
+     * @param int $id Id of the row in local_placecom_mcp_client.
+     * @return bool False if the client does not exist, true once it is deleted.
+     */
+    public static function delete_client(int $id): bool {
+        global $DB;
+
+        $client = $DB->get_record('local_placecom_mcp_client', ['id' => $id]);
+        if (!$client) {
+            return false;
+        }
+
+        $clientid = $client->client_id;
+        // Tables keyed by the string client_id that must go with the client.
+        $clienttables = [
+            'local_placecom_mcp_access_token',
+            'local_placecom_mcp_refresh_token',
+            'local_placecom_mcp_authorization_code',
+            'local_placecom_mcp_user_auth_scope',
+            'local_placecom_mcp_jwt',
+            'local_placecom_mcp_public_key',
+        ];
+
+        $transaction = $DB->start_delegated_transaction();
+        try {
+            // Collect affected users first, before any rows are deleted.
+            $userids = $DB->get_fieldset_sql(
+                'SELECT user_id FROM {local_placecom_mcp_access_token} WHERE client_id = :c1
+                 UNION SELECT user_id FROM {local_placecom_mcp_refresh_token} WHERE client_id = :c2
+                 UNION SELECT user_id FROM {local_placecom_mcp_user_auth_scope} WHERE client_id = :c3',
+                ['c1' => $clientid, 'c2' => $clientid, 'c3' => $clientid]
+            );
+
+            foreach ($userids as $userid) {
+                if (!empty($userid)) {
+                    observers::revoke_bridged_tokens_for_user((int) $userid);
+                }
+            }
+
+            foreach ($clienttables as $tablename) {
+                $DB->delete_records($tablename, ['client_id' => $clientid]);
+            }
+            $DB->delete_records('local_placecom_mcp_client', ['id' => $id]);
+
+            $transaction->allow_commit();
+        } catch (\Exception $e) {
+            $transaction->rollback($e);
+        }
+
+        return true;
+    }
+    /**
+     * Normalises a scope string typed into the client form.
+     *
+     * Scopes are separated by single spaces. Commas, tabs, newlines and repeated
+     * whitespace are all treated as separators, so "openid, profile" is stored as
+     * "openid profile" and still matches the scopes requested at connect time.
+     *
+     * @param string|null $scope The scope string as entered.
+     * @return string The scopes separated by single spaces, with no leading or trailing space.
+     */
+    public static function normalise_scope(?string $scope): string {
+        return trim(preg_replace('/[\s,]+/', ' ', (string) $scope));
+    }
 }
