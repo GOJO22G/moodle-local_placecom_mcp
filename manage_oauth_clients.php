@@ -149,7 +149,7 @@ switch ($action) {
                 ),
                 new moodle_url('/local/placecom_mcp/manage_oauth_clients.php')
             );
-                        } else {
+        } else {
             require_sesskey();
 
             if (!utils::delete_client($id)) {

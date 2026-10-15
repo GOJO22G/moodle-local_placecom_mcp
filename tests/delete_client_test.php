@@ -16,8 +16,6 @@
 
 namespace local_placecom_mcp;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Tests that deleting an OAuth client also removes the credentials issued to it.
  *

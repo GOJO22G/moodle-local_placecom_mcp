@@ -198,4 +198,3 @@ class observers {
         self::revoke_bridged_tokens_for_user((int) $userid);
     }
 }
-            
