@@ -1,7 +1,7 @@
 # Placecom MCP Connector
 
 `local_placecom_mcp` is a Moodle plugin that lets AI assistants supporting the
-[Model Context Protocol](https://modelcontextprotocol.io) (MCP), such as Claude,
+[Model Context Protocol](https://modelcontextprotocol.io) (MCP), such as Gemini Enterprise,
 securely access Moodle on behalf of a signed-in user. It bundles everything needed in
 a single plugin:
 
@@ -31,7 +31,7 @@ always apply. The assistant never sees more than that user could see in Moodle.
 ## Requirements
 
 - Moodle 4.5 or later. The plugin is tested automatically on Moodle 4.5 and 5.2 with MariaDB and PostgreSQL,
-  has also been run on Moodle 5.0 with MySQL, and has been used with Claude and Gemini Enterprise.
+  has also been run on Moodle 5.0 with MySQL, and has been used with Gemini Enterprise.
 - Web services enabled: *Site administration → Advanced features → Enable web services*. This is off on a
   new Moodle site. When it is off, the MCP endpoint refuses every request.
 - The PHP OpenSSL extension (used once at install time to generate the signing key pair).
@@ -41,7 +41,7 @@ always apply. The assistant never sees more than that user could see in Moodle.
   `php local/placecom_mcp/cli/generate_keys.php`.
   If key generation fails the install still completes, and the failure is only reported as a debugging
   notice, but sign-in cannot issue ID tokens until a key exists.
-- To connect a hosted assistant such as Claude, your Moodle site must be reachable
+- To connect a hosted assistant such as Gemini Enterprise, your Moodle site must be reachable
   from the internet over HTTPS. Hosted assistants cannot reach `localhost`.
 
 The plugin has no dependencies on other Moodle plugins and does not require Composer.
@@ -91,14 +91,14 @@ users holding the `local/placecom_mcp:manage_oauth_clients` capability (Managers
 1. Enable web services: *Site administration → Advanced features → Enable web services*. This is off on a new Moodle site, and the MCP endpoint refuses every request while it is off.
 2. Go to *Manage OAuth clients* and register a client for the assistant. Enter the
    redirect URI that the assistant gives you, and choose the scopes it may request.
-   For example, Claude uses `https://claude.ai/api/mcp/auth_callback` and Gemini Enterprise uses
-   `https://vertexaisearch.cloud.google.com/oauth-redirect` (check your assistant's documentation, as these can change).
+   For example, Gemini Enterprise uses `https://vertexaisearch.cloud.google.com/oauth-redirect`
+   (check Gemini Enterprise's documentation, as this can change).
    Grant `moodle_mcp_write` only if you want it to be able to post to forums.
    The client ID, redirect URI and scope are required. The redirect URI must be an `https://` address
    (or `http://localhost` for local testing), and the scope must include `moodle_mcp_read`. `moodle_mcp_write`
    is optional and is only valid together with read. "Require PKCE" is ticked by default. The `address` and
    `phone` scopes are not needed.
-3. In the assistant, add a custom MCP connector pointing at your MCP endpoint, and
+3. In Gemini Enterprise, add a custom MCP server pointing at your MCP endpoint, and
    supply the client ID (and secret, if the client has one).
 4. When the user first connects, they sign in to Moodle and approve the access request.
 
@@ -147,7 +147,7 @@ RewriteRule ^/moodle/\.well-known/(oauth-authorization-server|openid-configurati
 
 ### What a client is granted
 
-A client is granted the scopes it requests that are also registered for it. Assistants such as Claude request every scope the server advertises, so a client registered without `moodle_mcp_write` still connects, but its tokens carry no write permission and the two write tools are hidden and refused. A request that contains none of the client's registered scopes is rejected.
+A client is granted the scopes it requests that are also registered for it. Some assistants request every scope the server advertises, so a client registered without `moodle_mcp_write` still connects, but its tokens carry no write permission and the two write tools are hidden and refused. A request that contains none of the client's registered scopes is rejected.
 
 Reducing a client's scopes only affects new connections. Tokens that were already issued keep the scopes they were granted until they are revoked, so after removing a scope from a client, revoke that client's existing tokens under *Manage active tokens*. Users then sign in again and receive the reduced scope.
 
@@ -238,8 +238,8 @@ protection obligations.
 
 The plugin is free. It needs no subscription, licence key or API key from the plugin
 provider, and it does not call any external AI service itself. The AI assistant you
-connect is a separate product, chosen and configured by you, and may have its own plans
-and terms.
+connect (for example Gemini Enterprise) is a separate product, chosen and configured by you,
+and may have its own plans and terms.
 
 ## Third-party libraries
 
